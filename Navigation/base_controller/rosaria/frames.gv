@@ -1,0 +1,6 @@
+digraph G {
+"base_link" -> "laser"[label="Broadcaster: /base_to_laser_broadcaster\nAverage rate: 20.146 Hz\nMost recent transform: 1416714901.789 \nBuffer length: 4.865 sec\n"];
+"map" -> "base_link"[label="Broadcaster: /hector_mapping\nAverage rate: 10.262 Hz\nMost recent transform: 1416714901.615 \nBuffer length: 4.775 sec\n"];
+"world" -> "map"[label="Broadcaster: /world_to_map_broadcaster\nAverage rate: 20.147 Hz\nMost recent transform: 1416714901.799 \nBuffer length: 4.864 sec\n"];
+"map" -> "scanmatcher_frame"[label="Broadcaster: /hector_mapping\nAverage rate: 10.262 Hz\nMost recent transform: 1416714901.615 \nBuffer length: 4.775 sec\n"];
+}
