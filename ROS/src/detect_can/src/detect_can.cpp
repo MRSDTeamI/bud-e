@@ -19,10 +19,12 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/segmentation/extract_clusters.h>
 
+#include <geometry_msgs/Vector3.h>
 
 #include <typeinfo>
 
-ros::Publisher pub;
+ros::Publisher pub_cloud;
+ros::Publisher pub_coord;
 
 typedef pcl::PointXYZ PointT;
 
@@ -160,6 +162,11 @@ if (cluster_indices.size() > 0)
 Eigen::Vector4f centroid;
 pcl::compute3DCentroid(*outPCseg, cluster_indices[0], centroid);
 std::cerr << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
+geometry_msgs::Vector3 can_coord;
+can_coord.x = centroid[0];
+can_coord.y = centroid[1];
+can_coord.z = centroid[2];
+pub_coord.publish(can_coord);
 }
 
 /*
@@ -205,23 +212,25 @@ std::cerr << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::end
 	pcl_conversions::fromPCL(*object, output); // PointCloud2 to sensor-msgs
 	output.header.frame_id = input->header.frame_id;
 	
-	pub.publish(output);
+	pub_cloud.publish(output);
 }
 
 int
 main (int argc, char** argv)
 {
 	// Initialize ROS
-	ros::init (argc, argv, "my_pcl_tutorial");
+	ros::init (argc, argv, "detect_can");
 	ros::NodeHandle nh;
 	
 	// Create a ROS subscriber for the input point cloud
 	ros::Subscriber sub = nh.subscribe ("/camera/depth/points", 1, cloud_cb);
 	//ros::Subscriber sub = nh.subscribe ("/camera/rgb/points", 1, cloud_cb);
 	
-	// Create a ROS publisher for the output model coefficients
-	pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);
+	// Create a ROS publisher for the output cloud
+	pub_cloud = nh.advertise<sensor_msgs::PointCloud2> ("detect_can_cloud", 1);
+	// Create a ROS publisher for cluster center
+	pub_coord = nh.advertise<geometry_msgs::Vector3> ("cluster_center", 1);
 
-// Spin
+	// Spin
 	ros::spin ();
 }
