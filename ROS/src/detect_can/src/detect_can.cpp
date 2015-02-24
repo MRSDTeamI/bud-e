@@ -26,20 +26,21 @@
 ros::Publisher pub_cloud;
 ros::Publisher pub_coord;
 
+ros::Publisher pub_temp;
+
 typedef pcl::PointXYZ PointT;
 
 void 
 cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 {
-	// Convert sensor_msgs to pcl::PointCloud<pcl::pointxyz>
-//pcl::fromROSMsg (*input, *cloud);
 	//pcl::PCLPointCloud2::Ptr cloud (new pcl::PCLPointCloud2);
+	pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
+
+	// Convert sensor_msgs to PCLPointCloud2 to pcl::PointXYZ
 	pcl::PCLPointCloud2 temp_cloud;
 	pcl_conversions::toPCL (*input, temp_cloud);
-	pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
 	pcl::fromPCLPointCloud2(temp_cloud, *cloud);
 
-	// Convert the sensor_msgs/PointCloud2 data to pcl/PointCloud
 	pcl::PointCloud<PointT>::Ptr cloud_v (new pcl::PointCloud<PointT>);
 	pcl::PointCloud<PointT>::Ptr cloud_f (new pcl::PointCloud<PointT>);
 	pcl::PointCloud<PointT>::Ptr cloud_in (new pcl::PointCloud<PointT>);
@@ -56,11 +57,20 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 
 	pcl::NormalEstimation<PointT, pcl::Normal> ne;
 	pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
+
+	// For converting back to output
+	pcl::PCLPointCloud2::Ptr object (new pcl::PCLPointCloud2);
+	sensor_msgs::PointCloud2 output;
+
+	/*
+	// Probably don't need this b/c for seg cylinder
 	pcl::ExtractIndices<pcl::Normal> extract_normals;
 	pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
 	pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
+	*/
 	pcl::ModelCoefficients::Ptr coefficients_cylinder (new pcl::ModelCoefficients);
 
+	// Don't think this helps very much
 	// RUN PASS THROUGH FILTER TO REMOVE POINTS OUTSIDE OF DESIRED VIEW
 	pass.setInputCloud(cloud);
 	pass.setFilterFieldName("z");
@@ -72,12 +82,12 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	//pass.setFilterLimitsNegative(true);
 	pass.filter(*cloud_in);
 
-	// REMOVE STATISTICAL OUTLIERS
+	// REMOVE STATISTICAL OUTLIERS 
 	pcl::StatisticalOutlierRemoval<PointT> sor1;
-	sor1.setInputCloud(cloud_in);
+	sor1.setInputCloud(cloud_in);  // if using pass through filter
 	//sor1.setInputCloud(cloud);
-	sor1.setMeanK(50);
-	sor1.setStddevMulThresh (1);
+	sor1.setMeanK(10);  //50  10
+	sor1.setStddevMulThresh (0.05);  //1  0.5
 	sor1.filter(*cloud_v);
 
 	// DOWNSAMPLE USING VOXELS
@@ -85,11 +95,11 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	sor2.setLeafSize(0.01,0.01,0.01);
 	sor2.filter(*cloud_v);
 
-	// ESTIMATE POINT NORMALS
-	ne.setSearchMethod (tree);
-	ne.setInputCloud (cloud_v);
-	ne.setKSearch (50);
-	ne.compute (*cloud_normals);
+//	// ESTIMATE POINT NORMALS
+//	ne.setSearchMethod (tree);
+//	ne.setInputCloud (cloud_v);
+//	ne.setKSearch (50);
+//	ne.compute (*cloud_normals);
 
 	// EXTRACT PLANES FROM IMAGE
 	pcl::PointCloud<PointT>::Ptr inPCseg (new pcl::PointCloud<PointT>);
@@ -113,7 +123,7 @@ std::cerr << "Points: " << inPCseg->points.size() << std::endl;
 
 	int i = 0, count = 0, nr_points = (int) inPCseg->points.size();
 	// Keep segmenting planes until 10% of points are left
-	while (inPCseg->points.size() > 0.06 * nr_points) {
+	while (inPCseg->points.size() > 0.06 * nr_points) {  // 0.06
 
 		seg_plane.setInputCloud (inPCseg);
 		//seg.setInputNormals (cloud_normals);
@@ -132,10 +142,13 @@ std::cerr << "Points: " << inPCseg->points.size() << std::endl;
 		extract.setIndices (inliers_plane);
 		extract.setNegative (true);
 		extract.filter (*outPCseg);
+		/* 
+		// Probably don't need this b/c for segmenting cylinder
 		extract_normals.setNegative (true);
 		extract_normals.setInputCloud (cloud_normals);
 		extract_normals.setIndices (inliers_plane);
 		extract_normals.filter (*cloud_normals2);
+		*/
 
 		std::cerr << "Planar component: " << outPCseg->width * outPCseg->height 
 		<< " data points." << std::endl;
@@ -149,7 +162,7 @@ std::cerr << "Points: " << inPCseg->points.size() << std::endl;
 
 	std::vector<pcl::PointIndices> cluster_indices;
 	pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-	ec.setClusterTolerance (0.02); // 2cm
+	ec.setClusterTolerance (0.018); // 2cm  0.018
 	ec.setMinClusterSize (100);
 	ec.setMaxClusterSize (25000);
 	ec.setSearchMethod (tree);
@@ -167,6 +180,18 @@ can_coord.x = centroid[0];
 can_coord.y = centroid[1];
 can_coord.z = centroid[2];
 pub_coord.publish(can_coord);
+
+/* print cluster point cloud
+extract.setInputCloud (outPCseg);
+extract.setIndices (cluster_indices[0]);
+extract.setNegative (true);
+extract.filter (*cloud_v);
+	pcl::toPCLPointCloud2(*cloud_v, *object);  // PointXYZ to PointCloud2
+	pcl_conversions::fromPCL(*object, output); // PointCloud2 to sensor-msgs
+	output.header.frame_id = input->header.frame_id;
+
+pub_temp.publish(output);
+*/
 }
 
 /*
@@ -203,12 +228,10 @@ pub_coord.publish(can_coord);
 */
 
 	// Convert to ROS data type
-	pcl::PCLPointCloud2::Ptr object (new pcl::PCLPointCloud2);
-	sensor_msgs::PointCloud2 output;
 	//pcl::toPCLPointCloud2(*outPCseg,*cloud_f);
 	//pcl::toPCLPointCloud2(*cloud_cylinder,*cloud_f);
-	pcl::toPCLPointCloud2(*outPCseg, *object);  // PointXYZ to PointCloud2
 	//pcl::toPCLPointCloud2(*cloud_cylinder, *object);  // PointXYZ to PointCloud2
+	pcl::toPCLPointCloud2(*outPCseg, *object);  // PointXYZ to PointCloud2
 	pcl_conversions::fromPCL(*object, output); // PointCloud2 to sensor-msgs
 	output.header.frame_id = input->header.frame_id;
 	
@@ -230,6 +253,8 @@ main (int argc, char** argv)
 	pub_cloud = nh.advertise<sensor_msgs::PointCloud2> ("detect_can_cloud", 1);
 	// Create a ROS publisher for cluster center
 	pub_coord = nh.advertise<geometry_msgs::Vector3> ("cluster_center", 1);
+
+	pub_temp = nh.advertise<sensor_msgs::PointCloud2> ("test_cloud", 1);
 
 	// Spin
 	ros::spin ();
