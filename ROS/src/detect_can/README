@@ -1,0 +1,34 @@
+Tested with ROS Hydro.
+
+With Kinect plugged into the USB and powered on.
+
+Install this package under catkin_ws/src/
+
+detect_can - parses the scene for objects (removes planes and noise) then 
+returns the first object cluster's center coordinates. The center coordinates 
+are passed to a ROS topic.
+
+parse_center - parses the ROS topic of the center coordinates and averages 10 
+coordinates to generate 1 main coordinate. After the main coordinate is 
+generated, the program monitors the ROS topic for any large changes in 
+coordinate, and if the large change persists over 20 readings (~3sec) then it
+averages the next 10 coordinates and generates another "main" coordinate. This
+main coordinate is sent to a ROS topic.
+
+detect_cylinder - an updated program that specifically parses the scene for
+cylindrical objects, much like the original detect_can. This program will,
+however, reject objects that are not cylindrical.
+
+--------------------
+To Run
+--------------------
+
+$ roscore
+
+$ roslaunch openni_launch openni.launch 
+
+$ rosrun detect_can detect_can
+
+$ rosrun detect_can parse_center
+
+$ rosrun detect_can detect_cylinder
