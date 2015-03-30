@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/praveen/rosbuild_ws/package_dir/BUDE_Speech/build/devel/setup.sh
