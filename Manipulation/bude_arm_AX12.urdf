@@ -1,0 +1,100 @@
+<robot name="bude_arm>
+		width 0.1m base_arm_1 depth: 0.03m base_arm_1 heigth: 0.03m base_arm_2 length:
+		0.08m lowerarm length: 0.17m lowerarm width: 0.03m lowerarm heigth: 0.04m
+		middle_arm: 0.075m middle_arm_wrist offset 0.025 gripper length 0.17m mountplate
+		0.08m width: 0.05m -->
+
+
+	<joint name="joint1" type="revolute">
+		<limit effort="1000.0" lower="-2.48" upper="2.48" velocity="0.2" />
+		<parent link="base" />
+		<child link="base_arm" />
+		<origin xyz=" 0 0 0.00" rpy="0 0 0" />
+		<axis xyz="0 0 1" />
+	</joint>
+
+	<joint name="joint2" type="revolute">
+		<limit effort="1000.0" lower="-2.48" upper="2.48" velocity="0.2" />
+		<parent link="base_arm" />
+		<child link="lower_arm" />
+		<origin xyz="0 0 0.1" rpy="0 -1.57 -1.57 " /> <!-- d1 -->
+		<axis xyz="0 0 1" />
+	</joint>
+
+	<joint name="joint3" type="revolute">
+		<limit effort="1000.0" lower="-2.48" upper="2.48" velocity="0.2" />
+		<parent link="lower_arm" />
+		<child link="middle_arm" />
+		<origin xyz="0.20 0 0" rpy="3.145 0 0" /> <!-- a2 -->
+		<axis xyz="0 0 1" />
+	</joint>
+
+	<joint name="joint4" type="revolute">
+		<limit effort="1000.0" lower="-2.48" upper="2.48" velocity="0.2" />
+		<parent link="middle_arm" />
+		<child link="gripper_end_effector" />
+		<origin xyz="0.2 0.0 0.0" rpy="0 1.5707 0" /> <!-- d4 -->
+		<axis xyz="0 0 1" />
+	</joint>
+
+	<link name="base">
+		<visual>
+			<origin xyz="0 0 0.02" rpy="0 0 0" />
+			<geometry>
+				<box size="0.115 0.115 0.04" />
+			</geometry>
+			<material name="red">
+				<color rgba="1 1 0 1" />
+			</material>
+		</visual>
+	</link>
+
+	<link name="base_arm">
+		<visual>
+			<origin xyz="0 0 0.09" rpy="0 0 0" />
+			<geometry>
+				<box size="0.03 0.03 0.18 "/>
+			</geometry>
+			<material name="white">
+				<color rgba="1 1 1 1" />
+			</material>
+		</visual>
+	</link>
+
+	<link name="lower_arm">
+		<visual>
+			<origin xyz="0.085 0 0 " rpy="0 0 0" />
+			<geometry>
+				<box size="0.17 0.03 0.03"></box>
+			</geometry>
+			<material name="cyan">
+				<color rgba="0 1 1 1" />
+			</material>
+		</visual>
+	</link>
+
+	<link name="middle_arm">
+		<visual>
+			<origin xyz="0.015 0 0 " rpy="0 0 0" />
+			<geometry>
+				<box size="0.03 0.03 0.11" ></box>
+			</geometry>
+			<material name="blue">
+				<color rgba="0 0 1 1" />
+			</material>
+		</visual>
+	</link>
+
+	<link name="gripper_end_effector">
+		<visual>
+			<origin xyz="0 0 -0.1 " rpy="0 0 0" />
+			<geometry>
+				<box size=" 0.03 0.03 0.2 "></box>
+			</geometry>
+			<material name="grey">
+				<color rgba="0.5 0.3 0.9 1" />
+			</material>
+		</visual>
+	</link>
+
+</robot>
