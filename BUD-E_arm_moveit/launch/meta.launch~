@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+
+
+    <!-- Load controller configuration to parameter server -->
+    <rosparam file="$(find BUD-E_arm_moveit)/config/main_control.yaml" command="load"/>
+
+    <node name="dynamixel_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port=arm_port
+                --type=meta
+				Arm
+      				shoulder_pan_joint
+      				shoulder_pitch_joint
+      				elbow_flex_joint
+      				wrist_roll_joint
+
+				"
+          output="screen"/>
+</launch>

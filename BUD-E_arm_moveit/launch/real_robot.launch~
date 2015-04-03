@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- This launch file start moveit configured for talking to a real robot 
+		the BUD-E_arm_moveit/launch/base.launch and meta.launch must have 
+		been launched beforehand -->
+
+	<include
+		file="$(find BUD-E_arm_moveit)/launch/planning_context.launch">
+		<arg name="load_robot_description" value="true" />
+	</include>
+
+
+	<!-- Set the param that trajectory_execution_manager needs to find the controller 
+		plugin -->
+	<arg name="moveit_controller_manager"
+		default="moveit_simple_controller_manager/MoveItSimpleControllerManager" />
+	<param name="/move_group/moveit_controller_manager" value="$(arg moveit_controller_manager)" />
+	<!-- load controller_list -->
+	<rosparam file="$(find BUD-E_arm_moveit)/config/controllers.yaml"
+		ns="/move_group" />
+
+	<node pkg="robot_state_publisher" type="robot_state_publisher"
+		name="rob_st_pub" output="screen">
+		<remap from="robot_description" to="/robot_description" />
+	</node>
+
+
+
+	<!-- Run the main MoveIt executable without trajectory execution (we do 
+		not have controllers configured by default) -->
+	<include file="$(find BUD-E_arm_moveit)/launch/move_group.launch">
+		<arg name="allow_trajectory_execution" value="true" />
+		<arg name="fake_execution" value="false" />
+		<arg name="info" value="true" />
+		<arg name="debug" value="false" />
+	</include>
+
+	<!-- Run Rviz and load the default config to see the state of the move_group 
+		node -->
+	<include file="$(find BUD-E_arm_moveit)/launch/moveit_rviz.launch">
+		<arg name="config" value="true" />
+		<arg name="debug" value="false" />
+	</include>
+
+</launch>

@@ -1,0 +1,8 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ""
+    relative_path: /home/gautam/BUD-E_latest.xml
+  SRDF:
+    relative_path: config/BUD-E.srdf
+  CONFIG:
+    generated_timestamp: 1427876452
