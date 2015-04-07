@@ -51,7 +51,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	pcl::PassThrough<PointT> pass;
 	pcl::ExtractIndices<PointT> extract;
 	pcl::SACSegmentation<PointT> seg_plane;
-	pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg_cyl;
+	//pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg_cyl;
 	//pcl::VoxelGrid<pcl::PCLPointCloud2> sor2;
 	pcl::VoxelGrid<PointT> sor2;
 
@@ -66,8 +66,9 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	// Probably don't need this b/c for seg cylinder
 	pcl::ExtractIndices<pcl::Normal> extract_normals;
 	pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-	pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
+	//pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
 	*/
+	
 	pcl::ModelCoefficients::Ptr coefficients_cylinder (new pcl::ModelCoefficients);
 
 	// Don't think this helps very much
@@ -76,7 +77,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	pass.setFilterFieldName("z");
 	pass.setFilterLimits(0,1.5);  // filter out points greater than 1.5m
 	pass.setFilterFieldName("x");
-	pass.setFilterLimits(0,1);
+	pass.setFilterLimits(-0.1,1);
 	//pass.setFilterFieldName("y");
 	//pass.setFilterLimits(0,8);
 	//pass.setFilterLimitsNegative(true);
@@ -87,13 +88,21 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	sor1.setInputCloud(cloud_in);  // if using pass through filter
 	//sor1.setInputCloud(cloud);
 	sor1.setMeanK(10);  //50  10
-	sor1.setStddevMulThresh (0.05);  //1  0.5
+	sor1.setStddevMulThresh (0.005);  //1  0.5
 	sor1.filter(*cloud_v);
 
 	// DOWNSAMPLE USING VOXELS
 	sor2.setInputCloud (cloud_v);
 	sor2.setLeafSize(0.01,0.01,0.01);
 	sor2.filter(*cloud_v);
+
+/*
+    // Try removing statistical outlier again
+    sor1.setInputCloud(cloud_v);  // if using pass through filter
+    sor1.setMeanK(10);  //50  10
+    sor1.setStddevMulThresh (0.05);  //1  0.5
+    sor1.filter(*cloud_v);
+*/
 
 //	// ESTIMATE POINT NORMALS
 //	ne.setSearchMethod (tree);
@@ -124,6 +133,7 @@ std::cerr << "Points: " << inPCseg->points.size() << std::endl;
 	int i = 0, count = 0, nr_points = (int) inPCseg->points.size();
 	// Keep segmenting planes until 10% of points are left
 	while (inPCseg->points.size() > 0.06 * nr_points) {  // 0.06
+	//while (inPCseg->points.size() > 0.1 * nr_points) {  // 0.06
 
 		seg_plane.setInputCloud (inPCseg);
 		//seg.setInputNormals (cloud_normals);
@@ -142,13 +152,12 @@ std::cerr << "Points: " << inPCseg->points.size() << std::endl;
 		extract.setIndices (inliers_plane);
 		extract.setNegative (true);
 		extract.filter (*outPCseg);
-		/* 
-		// Probably don't need this b/c for segmenting cylinder
-		extract_normals.setNegative (true);
-		extract_normals.setInputCloud (cloud_normals);
-		extract_normals.setIndices (inliers_plane);
-		extract_normals.filter (*cloud_normals2);
-		*/
+		 
+		//// Probably don't need this b/c for segmenting cylinder
+		//extract_normals.setNegative (true);
+		//extract_normals.setInputCloud (cloud_normals);
+		//extract_normals.setIndices (inliers_plane);
+		//extract_normals.filter (*cloud_normals2);
 
 		std::cerr << "Planar component: " << outPCseg->width * outPCseg->height 
 		<< " data points." << std::endl;
@@ -156,6 +165,12 @@ std::cerr << "Points: " << inPCseg->points.size() << std::endl;
 		inPCseg.swap(outPCseg);
 		count++;
 	}
+    // Try removing statistical outlier again
+    sor1.setInputCloud(outPCseg);  // if using pass through filter
+    sor1.setMeanK(10);  //50  10
+    sor1.setStddevMulThresh (0.05);  //1  0.5
+    sor1.filter(*outPCseg);
+
 	// Creating the KdTree object for the search method of the extraction
 	//pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
 	tree->setInputCloud (outPCseg);
@@ -164,7 +179,7 @@ std::cerr << "Points: " << inPCseg->points.size() << std::endl;
 	pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
 	ec.setClusterTolerance (0.018); // 2cm  0.018
 	ec.setMinClusterSize (100);
-	ec.setMaxClusterSize (25000);
+	ec.setMaxClusterSize (2500);
 	ec.setSearchMethod (tree);
 	ec.setInputCloud (outPCseg);
 	ec.extract (cluster_indices);
@@ -208,7 +223,7 @@ pub_temp.publish(output);
 	seg_cyl.setNormalDistanceWeight (0.1);
 	seg_cyl.setMaxIterations (100);
 	seg_cyl.setDistanceThreshold (0.1);
-	seg_cyl.setRadiusLimits (0.01, 0.05);
+	seg_cyl.setRadiusLimits (0.01, 0.03);
 	seg_cyl.setInputCloud (outPCseg);
 	seg_cyl.setInputNormals (cloud_normals);
 
