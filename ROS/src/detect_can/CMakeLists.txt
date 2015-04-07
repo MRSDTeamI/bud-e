@@ -95,7 +95,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -163,5 +163,12 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 add_executable(detect_can src/detect_can.cpp)
 target_link_libraries(detect_can ${catkin_LIBRARIES})
+add_executable(parse_center src/parse_center.cpp)
+target_link_libraries(parse_center ${catkin_LIBRARIES})
+add_executable(detect_cylinder src/detect_cylinder.cpp)
+target_link_libraries(detect_cylinder ${catkin_LIBRARIES})
