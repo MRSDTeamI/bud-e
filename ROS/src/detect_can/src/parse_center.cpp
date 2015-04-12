@@ -2,6 +2,7 @@
 #include <geometry_msgs/Vector3.h>
 #include <stdlib.h>
 #include <math.h>
+#include <std_msgs/UInt16.h>
 
 float x;
 float y;
@@ -9,8 +10,8 @@ float z;
 int NUM_RUNS = 20;
 int count = 0;
 int reset_count = 0;
-int RESET_MAX = 5;
-float height_dev = 0.03;   // in meters
+int RESET_MAX = 10;
+float height_dev = 0.05;   // in meters
 // The different states we can be in while parsing the stream of coordinates
 // for the cluster center
 enum coord_state {
@@ -20,7 +21,8 @@ enum coord_state {
 };
 coord_state current_state = INIT;
 
-ros::Publisher pub;
+ros::Publisher pub_bot;
+ros::Publisher pub_sl;
 
 void parse_center(const geometry_msgs::Vector3 input)
 {
@@ -48,11 +50,47 @@ std::cerr << "----------------" << std::endl;
 std::cerr << x << " " << y << " " << z << std::endl;
 std::cerr << "----------------" << std::endl;
 
-				geometry_msgs::Vector3 output;
-				output.x = x;
-				output.y = y;
-				output.z = z;
-				pub.publish(output);
+				geometry_msgs::Vector3 arm_output;
+				/******
+				Convert coordinates to arm coordinates.
+				Kinect coordinates (Kinect frame):
+					x to the left
+					y going up
+					z going forward
+				Arm coordinates (Arm frame):
+					x going forward
+					y to the left
+					z going up
+
+				Furthermore, because the Kinect is mounted above and behind
+				the arm, we need to subtract from the height and depth
+				measurements.
+				
+				
+				******/
+				//arm_output.x = x * 100;
+				//arm_output.y = y * 100;
+				//arm_output.z = z * 100;
+				
+				double kinect_depth = 0.28; // Kinect is 11 inches (28cm) behind the arm.
+				double kinect_height = 0.2; // Kinect is 8 inches (20cm) above the arm.
+				double bottle_ht = 0.088;   // approx. bottle center height (above gnd plane)
+				
+				arm_output.x = z - kinect_depth;
+				arm_output.y = x;
+				arm_output.z = y - kinect_height + bottle_ht;
+				pub_bot.publish(arm_output);
+
+				// for scissor lift
+				// range of height for PR 9 should be 0-20cm
+				// cap on these values only for this PR
+				if (y < 0)  
+					y = 0;
+				if (y > 0.2)
+					y = 0.2;
+				std_msgs::UInt16 sl_output;
+				sl_output.data = y*100;
+				pub_sl.publish(sl_output);
 
 				count = 0;
 				current_state = MONITOR;
@@ -88,7 +126,11 @@ main (int argc, char** argv)
  
 	ros::Subscriber sub = nh.subscribe ("cluster_center", 100, parse_center);
 
-	pub = nh.advertise<geometry_msgs::Vector3>("bottle_center",100);
+	// bottle coordinates for arm
+	pub_bot = nh.advertise<geometry_msgs::Vector3>("bottle_center",100);
+
+	// height (0-20cm) for scissor lift
+	pub_sl = nh.advertise<std_msgs::UInt16>("target_height",100);
 //
 //	// Sets up the random number generator
 //	srand(time(0));
