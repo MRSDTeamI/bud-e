@@ -1,0 +1,57 @@
+\subsubsection usage Usage
+\verbatim
+<node name="CartCommandPublisherByDynReconf" pkg="hearbo_cart_msgs" type="CartCommandPublisherByDynReconf">
+  <param name="publish_flag" type="bool" value="False" />
+  <param name="drive_flag" type="bool" value="False" />
+  <param name="drive_mode" type="int" value="0" />
+  <param name="drive_id_0" type="bool" value="False" />
+  <param name="drive_id_1" type="bool" value="False" />
+  <param name="drive_id_2" type="bool" value="False" />
+  <param name="drive_id_3" type="bool" value="False" />
+  <param name="each_vel_0" type="double" value="0.0" />
+  <param name="each_vel_1" type="double" value="0.0" />
+  <param name="each_vel_2" type="double" value="0.0" />
+  <param name="each_vel_3" type="double" value="0.0" />
+  <param name="each_ang_0" type="double" value="0.0" />
+  <param name="each_ang_1" type="double" value="0.0" />
+  <param name="each_ang_2" type="double" value="0.0" />
+  <param name="each_ang_3" type="double" value="0.0" />
+  <param name="all_vel" type="double" value="0.0" />
+  <param name="all_ang" type="double" value="0.0" />
+  <param name="gain_flag" type="bool" value="False" />
+  <param name="gain_id_ch0_0" type="bool" value="False" />
+  <param name="gain_id_ch0_1" type="bool" value="False" />
+  <param name="gain_id_ch0_2" type="bool" value="False" />
+  <param name="gain_id_ch0_3" type="bool" value="False" />
+  <param name="gain_ch0_0" type="int" value="0" />
+  <param name="gain_ch0_1" type="int" value="0" />
+  <param name="gain_ch0_2" type="int" value="0" />
+  <param name="gain_ch0_3" type="int" value="0" />
+  <param name="gain_id_ch1_0" type="bool" value="False" />
+  <param name="gain_id_ch1_1" type="bool" value="False" />
+  <param name="gain_id_ch1_2" type="bool" value="False" />
+  <param name="gain_id_ch1_3" type="bool" value="False" />
+  <param name="gain_ch1_0" type="int" value="0" />
+  <param name="gain_ch1_1" type="int" value="0" />
+  <param name="gain_ch1_2" type="int" value="0" />
+  <param name="gain_ch1_3" type="int" value="0" />
+  <param name="encoder_flag" type="bool" value="False" />
+  <param name="encoder_id_ch0_0" type="bool" value="False" />
+  <param name="encoder_id_ch0_1" type="bool" value="False" />
+  <param name="encoder_id_ch0_2" type="bool" value="False" />
+  <param name="encoder_id_ch0_3" type="bool" value="False" />
+  <param name="encoder_ch0_0" type="int" value="0" />
+  <param name="encoder_ch0_1" type="int" value="0" />
+  <param name="encoder_ch0_2" type="int" value="0" />
+  <param name="encoder_ch0_3" type="int" value="0" />
+  <param name="encoder_id_ch1_0" type="bool" value="False" />
+  <param name="encoder_id_ch1_1" type="bool" value="False" />
+  <param name="encoder_id_ch1_2" type="bool" value="False" />
+  <param name="encoder_id_ch1_3" type="bool" value="False" />
+  <param name="encoder_ch1_0" type="int" value="0" />
+  <param name="encoder_ch1_1" type="int" value="0" />
+  <param name="encoder_ch1_2" type="int" value="0" />
+  <param name="encoder_ch1_3" type="int" value="0" />
+</node>
+\endverbatim
+

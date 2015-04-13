@@ -1,0 +1,9 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~stop" : \b [bool] Emergency stop min: False, default: False, max: True
+- \b "~velocity_x" : \b [double] backward forward velocity min: -50.0, default: 0.0, max: 50.0
+- \b "~velocity_y" : \b [double] left right velocity min: -50.0, default: 0.0, max: 50.0
+- \b "~velocity_rot" : \b [double] spin velocity min: -50.0, default: 0.0, max: 50.0
+

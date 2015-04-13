@@ -1,0 +1,56 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~publish_flag" : \b [bool] Switch for publishing the message min: False, default: False, max: True
+- \b "~drive_flag" : \b [bool] drive flag min: False, default: False, max: True
+- \b "~drive_mode" : \b [int] driving mode min: 0, default: 0, max: 4
+- \b "~drive_id_0" : \b [bool] Activate left front wheel min: False, default: False, max: True
+- \b "~drive_id_1" : \b [bool] Activate left back wheel min: False, default: False, max: True
+- \b "~drive_id_2" : \b [bool] Activate right back wheel min: False, default: False, max: True
+- \b "~drive_id_3" : \b [bool] Activate right front wheel min: False, default: False, max: True
+- \b "~each_vel_0" : \b [double] velocity of left front wheel [mm/s] (MANUAL_MODE) min: -20.0, default: 0.0, max: 20.0
+- \b "~each_vel_1" : \b [double] velocity of left back wheel [mm/s] (MANUAL_MODE) min: -20.0, default: 0.0, max: 20.0
+- \b "~each_vel_2" : \b [double] velocity of right back wheel [mm/s] (MANUAL_MODE) min: -20.0, default: 0.0, max: 20.0
+- \b "~each_vel_3" : \b [double] velocity of right front wheel [mm/s] (MANUAL_MODE) min: -20.0, default: 0.0, max: 20.0
+- \b "~each_ang_0" : \b [double] steering angle of left front wheel [deg] (MANUAL_MODE) min: -180.0, default: 0.0, max: 180.0
+- \b "~each_ang_1" : \b [double] steering angle of left back wheel [deg] (MANUAL_MODE) min: -180.0, default: 0.0, max: 180.0
+- \b "~each_ang_2" : \b [double] steering angle of right back wheel [deg] (MANUAL_MODE) min: -180.0, default: 0.0, max: 180.0
+- \b "~each_ang_3" : \b [double] steering angle of right front wheel [deg] (MANUAL_MODE) min: -180.0, default: 0.0, max: 180.0
+- \b "~all_vel" : \b [double] velocity of left front wheel [mm/s] min: -50.0, default: 0.0, max: 50.0
+- \b "~all_ang" : \b [double] steering angle of left front wheel [deg] min: -180.0, default: 0.0, max: 180.0
+- \b "~gain_flag" : \b [bool] gain flag min: False, default: False, max: True
+- \b "~gain_id_ch0_0" : \b [bool] Activate gain change of left front driving wheel min: False, default: False, max: True
+- \b "~gain_id_ch0_1" : \b [bool] Activate gain change of left back driving wheel min: False, default: False, max: True
+- \b "~gain_id_ch0_2" : \b [bool] Activate gain change of right back driving wheel min: False, default: False, max: True
+- \b "~gain_id_ch0_3" : \b [bool] Activate gain change of right front driving wheel min: False, default: False, max: True
+- \b "~gain_ch0_0" : \b [int] gain of left front driving wheel min: -32768, default: 0, max: 32767
+- \b "~gain_ch0_1" : \b [int] gain of left back driving wheel min: -32768, default: 0, max: 32767
+- \b "~gain_ch0_2" : \b [int] gain of right back driving wheel min: -32768, default: 0, max: 32767
+- \b "~gain_ch0_3" : \b [int] gain of right front driving wheel min: -32768, default: 0, max: 32767
+- \b "~gain_id_ch1_0" : \b [bool] Activate gain change of left front steering motor min: False, default: False, max: True
+- \b "~gain_id_ch1_1" : \b [bool] Activate gain change of left back steering motor min: False, default: False, max: True
+- \b "~gain_id_ch1_2" : \b [bool] Activate gain change of right back steering motor min: False, default: False, max: True
+- \b "~gain_id_ch1_3" : \b [bool] Activate gain change of right front steering motor min: False, default: False, max: True
+- \b "~gain_ch1_0" : \b [int] gain of left front steering motor min: -32768, default: 0, max: 32767
+- \b "~gain_ch1_1" : \b [int] gain of left back steering motor min: -32768, default: 0, max: 32767
+- \b "~gain_ch1_2" : \b [int] gain of right back steering motor min: -32768, default: 0, max: 32767
+- \b "~gain_ch1_3" : \b [int] gain of right front steering motor min: -32768, default: 0, max: 32767
+- \b "~encoder_flag" : \b [bool] encoder flag min: False, default: False, max: True
+- \b "~encoder_id_ch0_0" : \b [bool] Activate encoder reset of left front driving wheel min: False, default: False, max: True
+- \b "~encoder_id_ch0_1" : \b [bool] Activate encoder reset of left back driving wheel min: False, default: False, max: True
+- \b "~encoder_id_ch0_2" : \b [bool] Activate encoder reset of right back driving wheel min: False, default: False, max: True
+- \b "~encoder_id_ch0_3" : \b [bool] Activate encoder reset of right front driving wheel min: False, default: False, max: True
+- \b "~encoder_ch0_0" : \b [int] encoder value of left front driving wheel min: -32768, default: 0, max: 32767
+- \b "~encoder_ch0_1" : \b [int] encoder value of left back driving wheel min: -32768, default: 0, max: 32767
+- \b "~encoder_ch0_2" : \b [int] encoder value of right back driving wheel min: -32768, default: 0, max: 32767
+- \b "~encoder_ch0_3" : \b [int] encoder value of right front driving wheel min: -32768, default: 0, max: 32767
+- \b "~encoder_id_ch1_0" : \b [bool] Activate encoder reset of left front steering motor min: False, default: False, max: True
+- \b "~encoder_id_ch1_1" : \b [bool] Activate encoder reset of left back steering motor min: False, default: False, max: True
+- \b "~encoder_id_ch1_2" : \b [bool] Activate encoder reset of right back steering motor min: False, default: False, max: True
+- \b "~encoder_id_ch1_3" : \b [bool] Activate encoder reset of right front steering motor min: False, default: False, max: True
+- \b "~encoder_ch1_0" : \b [int] encoder value of left front steering motor min: -32768, default: 0, max: 32767
+- \b "~encoder_ch1_1" : \b [int] encoder value of left back steering motor min: -32768, default: 0, max: 32767
+- \b "~encoder_ch1_2" : \b [int] encoder value of right back steering motor min: -32768, default: 0, max: 32767
+- \b "~encoder_ch1_3" : \b [int] encoder value of right front steering motor min: -32768, default: 0, max: 32767
+

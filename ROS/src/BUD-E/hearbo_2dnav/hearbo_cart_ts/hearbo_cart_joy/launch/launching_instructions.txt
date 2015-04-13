@@ -1,0 +1,24 @@
+1. Setup
+   Buffalo USB Game Controller
+   Turn "analog" button ON (The blue LED is ON)
+
+2. Find "jsX" device file
+
+$ ls /dev/input/
+
+3. Test whether joystick input is correct
+
+$ sudo jstest /dev/input/jsX
+
+4. Authorization
+
+$ sudo chmod a+rw /dev/input/jsX
+
+5. Launching
+
+5-1 : IXS Cart
+roslaunch hearbo_cart_joy hearbo_ixs_cart_joy.launch
+
+5-2 : Tokyo Seiki Cart
+roslaunch hearbo_cart_joy hearbo_ts_cart_joy.launch
+

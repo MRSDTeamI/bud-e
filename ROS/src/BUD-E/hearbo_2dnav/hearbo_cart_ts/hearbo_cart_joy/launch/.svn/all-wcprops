@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_joy/launch
+END
+hearbo_ixs_cart_joy.launch
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_joy/launch/hearbo_ixs_cart_joy.launch
+END
+hearbo_ts_cart_joy.launch
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_joy/launch/hearbo_ts_cart_joy.launch
+END
+launching_instructions.txt
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_joy/launch/launching_instructions.txt
+END

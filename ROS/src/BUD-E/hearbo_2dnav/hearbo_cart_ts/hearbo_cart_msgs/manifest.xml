@@ -1,0 +1,19 @@
+<package>
+  <description brief="hearbo_cart_msgs">
+
+     hearbo_cart_msgs
+
+  </description>
+  <author>Keisuke Nakamura</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hearbo_cart_msgs</url>
+  <depend package="roscpp"/>
+  <depend package="dynamic_reconfigure"/>
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp -I${prefix}/srv/cpp"/>
+  </export>
+
+</package>
+
+

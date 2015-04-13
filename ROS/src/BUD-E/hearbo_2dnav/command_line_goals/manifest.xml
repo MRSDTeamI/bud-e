@@ -1,0 +1,18 @@
+<package>
+  <description brief="command_line_goals">
+
+     command_line_goals
+
+  </description>
+  <author>Gautam Narang</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/command_line_goals</url>
+  <depend package="move_base_msgs" />
+  <depend package="rosconsole" />
+  <depend package="roscpp" />
+  <depend package="actionlib" />
+
+</package>
+
+

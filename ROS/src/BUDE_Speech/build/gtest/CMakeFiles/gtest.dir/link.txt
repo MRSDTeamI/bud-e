@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC -O2 -g -DNDEBUG   -shared -Wl,-soname,libgtest.so -o /home/praveen/rosbuild_ws/package_dir/BUDE_Speech/lib/libgtest.so CMakeFiles/gtest.dir/src/gtest-all.cc.o  -L/home/praveen/rosbuild_ws/package_dir/BUDE_Speech/build/gtest/src -lpthread -Wl,-rpath,/home/praveen/rosbuild_ws/package_dir/BUDE_Speech/build/gtest/src 

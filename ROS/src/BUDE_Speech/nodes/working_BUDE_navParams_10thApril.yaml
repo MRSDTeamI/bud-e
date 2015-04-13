@@ -1,0 +1,117 @@
+RosAria: {DriftFactor: 0, RevCount: 16570, TicksMM: 128, lat_accel: 0.0, lat_decel: 0.0,
+  rot_accel: 0.0, rot_decel: 0.0, trans_accel: 0.0, trans_decel: 0.0}
+hector_geotiff_node: {draw_background_checkerboard: true, draw_free_space_grid: true,
+  geotiff_save_period: 0.0, map_file_base_name: hector_slam_map, map_file_path: /opt/ros/indigo/share/hector_geotiff/maps,
+  plugins: hector_geotiff_plugins/TrajectoryMapWriter}
+hector_mapping: {base_frame: base_link, map_frame: map, map_resolution: 0.05, map_size: 1024,
+  map_start_x: 0.5, map_start_y: 0.5, map_update_angle_thresh: 0.06, map_update_distance_thresh: 0.4,
+  odom_frame: base_link, output_timing: false, pub_map_odom_transform: true, scan_topic: scan,
+  update_factor_free: 0.4, update_factor_occupied: 0.9, use_tf_pose_start_estimate: false,
+  use_tf_scan_transformation: true}
+hector_trajectory_server: {source_frame_name: /base_link, target_frame_name: /map,
+  trajectory_publish_rate: 0.25, trajectory_update_rate: 4.0}
+hokuyo_node: {allow_unsafe_settings: false, calibrate_time: true, cluster: 1, frame_id: laser,
+  intensity: false, max_ang: 2.0923497676849365, max_ang_limit: 2.0923497676849365,
+  max_range: 5.599999904632568, min_ang: -2.0862138271331787, min_ang_limit: -2.0862138271331787,
+  min_range: 0.019999999552965164, port: /dev/ttyACM0, skip: 0, time_offset: 0.0}
+move_base:
+  TrajectoryPlannerROS: {acc_lim_th: 3.2, acc_lim_theta: 3.2, acc_lim_x: 1.6, acc_lim_y: 2.5,
+    angular_sim_granularity: 0.025, controller_frequency: 20.0, dwa: true, escape_reset_dist: 0.1,
+    escape_reset_theta: 1.57079632679, escape_vel: -0.2, gdist_scale: 0.8, goal_distance_bias: 0.6,
+    heading_lookahead: 0.325, heading_scoring: false, heading_scoring_timestep: 0.1,
+    holonomic_robot: false, max_rotational_vel: 0.8, max_vel_theta: 1.0, max_vel_x: 0.8,
+    meter_scoring: true, min_in_place_rotational_vel: 0.3, min_in_place_vel_theta: 0.4,
+    min_vel_theta: -1.0, min_vel_x: 0.1, occdist_scale: 0.01, oscillation_reset_dist: 1.0,
+    path_distance_bias: 0.6, pdist_scale: 3.0, restore_defaults: false, sim_granularity: 0.025,
+    sim_time: 2.0, simple_attractor: false, vtheta_samples: 20, vx_samples: 20, xy_goal_tolerance: 0.09,
+    y_vels: '-0.3,-0.1,0.1,-0.3', yaw_goal_tolerance: 0.06}
+  aggressive_reset: {reset_distance: 1.84}
+  base_global_planner: navfn/NavfnROS
+  base_local_planner: base_local_planner/TrajectoryPlannerROS
+  clearing_rotation_allowed: true
+  conservative_reset: {reset_distance: 3.0}
+  conservative_reset_dist: 3.0
+  controller_frequency: 10.0
+  controller_patience: 5.0
+  global_costmap:
+    footprint: '[[0.3302,-0.0508],[0.254,-0.0508],[0.254,-0.254],[-0.254,-0.254],[-0.254,0.254],[0.254,0.254],[0.254,0.0508],[0.3302,0.0508]]'
+    footprint_padding: 0.01
+    global_frame: /map
+    height: 10
+    inflation_layer: {cost_scaling_factor: 10.0, enabled: true, inflation_radius: 0.35}
+    map_type: costmap
+    obstacle_layer:
+      combination_method: 1
+      enabled: true
+      laser_scan_sensor: {clearing: true, data_type: LaserScan, expected_update_rate: 0.2,
+        marking: true, sensor_frame: laser, topic: scan}
+      max_obstacle_height: 2.0
+      observation_sources: laser_scan_sensor
+      obstacle_range: 2.5
+      raytrace_range: 3.0
+    obstacle_layer_footprint: {enabled: true}
+    origin_x: 0.0
+    origin_y: 0.0
+    plugins:
+    - {name: static_layer, type: 'costmap_2d::StaticLayer'}
+    - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+    - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+    publish_frequency: 10.0
+    resolution: 0.05
+    robot_base_frame: base_link
+    robot_radius: 0.46
+    static_layer: {enabled: true}
+    static_map: true
+    transform_tolerance: 0.2
+    update_frequency: 2.0
+    width: 10
+  local_costmap:
+    footprint: '[[0.3302,-0.0508],[0.254,-0.0508],[0.254,-0.254],[-0.254,-0.254],[-0.254,0.254],[0.254,0.254],[0.254,0.0508],[0.3302,0.0508]]'
+    footprint_padding: 0.01
+    global_frame: /odom
+    height: 5
+    inflation_layer: {cost_scaling_factor: 10.0, enabled: true, inflation_radius: 0.35}
+    map_type: costmap
+    obstacle_layer:
+      combination_method: 1
+      enabled: true
+      laser_scan_sensor: {clearing: true, data_type: LaserScan, expected_update_rate: 0.2,
+        marking: true, sensor_frame: laser, topic: scan}
+      max_obstacle_height: 2.0
+      observation_sources: laser_scan_sensor
+      obstacle_range: 2.5
+      raytrace_range: 3.0
+    obstacle_layer_footprint: {enabled: true}
+    origin_x: 0.0
+    origin_y: 0.0
+    plugins:
+    - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+    - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+    publish_frequency: 10.0
+    resolution: 0.05
+    robot_base_frame: base_link
+    robot_radius: 0.46
+    rolling_window: true
+    static_map: false
+    transform_tolerance: 0.4
+    update_frequency: 8.0
+    width: 5
+  oscillation_distance: 0.5
+  oscillation_timeout: 0.0
+  planner_frequency: 0.0
+  planner_patience: 5.0
+  recovery_behavior_enabled: true
+  restore_defaults: false
+  shutdown_costmaps: false
+recognizer: {dict: /home/praveen/rosbuild_ws/package_dir/BUDE_Speech/config/BUDE.dic,
+  lm: /home/praveen/rosbuild_ws/package_dir/BUDE_Speech/config/BUDE.lm}
+rosdistro: 'indigo
+
+  '
+roslaunch:
+  uris: {host_praveen_inspiron_7537__48936: 'http://praveen-Inspiron-7537:48936/',
+    host_praveen_inspiron_7537__50685: 'http://praveen-Inspiron-7537:50685/'}
+rosversion: '1.11.10
+
+  '
+run_id: cbe93356-e090-11e4-9dbc-f159ca38e727

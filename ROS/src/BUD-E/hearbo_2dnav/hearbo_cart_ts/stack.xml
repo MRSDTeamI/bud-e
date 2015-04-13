@@ -1,0 +1,9 @@
+<stack>
+  <description brief="hearbo_cart_ts">hearbo_cart_ts</description>
+  <author>Maintained by yoshida</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hearbo_cart_ts</url>
+  <depend stack="ros" />
+
+</stack>
