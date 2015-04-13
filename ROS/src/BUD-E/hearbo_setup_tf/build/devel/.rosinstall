@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/devel/setup.sh

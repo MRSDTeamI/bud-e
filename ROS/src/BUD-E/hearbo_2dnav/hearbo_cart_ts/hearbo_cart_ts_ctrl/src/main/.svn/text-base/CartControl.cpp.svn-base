@@ -1,0 +1,74 @@
+// ROS
+#include "ros/ros.h"
+#include "hearbo_cart_msgs/CartVelocity.h"
+
+// Cart
+#include "CartCommandMaker.h"
+
+CartCommandMaker g_oCommandMaker;
+
+void setCartVelocity(const hearbo_cart_msgs::CartVelocity::ConstPtr& msg);
+
+int main(int argc, char **argv)
+{
+  bool bDoConnect = true;
+  
+  // Connect to robot
+  bool bConnected = g_oCommandMaker.initialize(bDoConnect);
+  if( !bConnected ) ROS_WARN( "Could not connect to cart." );
+  if( !bDoConnect )
+  {
+    ROS_WARN( "Not connecting to cart (change flag bDoConnect)." );
+    bConnected = false;
+  }
+  
+  // Initialize ROS node
+  ros::init(argc, argv, "cart_control");
+  ros::NodeHandle n;
+      
+  // Activate the cart
+  if( bConnected )
+  {
+    g_oCommandMaker.sendActivationCommand();
+    ROS_INFO("Cart activated."); 
+  }
+  
+  // Subscribe to all command messages
+  ros::Subscriber sub0 = n.subscribe("/hearbo_ts_cart_ctrl/commands", 1, setCartVelocity);
+  ROS_INFO("Ready for ROS commands.");
+  
+  ros::spin();
+
+  g_oCommandMaker.terminate();
+  return 0;
+}
+
+void setCartVelocity(const hearbo_cart_msgs::CartVelocity::ConstPtr& msg)
+{
+
+  // ROS_INFO("Received : x : %f, y : %f, r : %f",msg->velocity_x,msg->velocity_y,msg->velocity_rot);
+
+  if( fabs(msg->velocity_rot) < 0.0001 ) // if the rotational velocity is zero
+  {
+    // if the translational velocity is zero too, stop the robot
+    if( (fabs(msg->velocity_x) < 0.0001) && (fabs(msg->velocity_y) < 0.0001) )
+    {
+      g_oCommandMaker.sendRotationalVelocityCommand( 0 );
+      g_oCommandMaker.sendTranslationalVelocityCommand( 0, 0 );
+    }
+    // send a translational velocity command
+    else
+    {
+      g_oCommandMaker.sendTranslationalVelocityCommand( msg->velocity_x, msg->velocity_y );
+    }
+  }
+  else // if the rotational velocity is not zero
+  {
+    // send a rotational velocity command
+    g_oCommandMaker.sendRotationalVelocityCommand( msg->velocity_rot );
+  }
+}
+
+
+
+

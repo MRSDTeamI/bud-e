@@ -1,0 +1,17 @@
+<package>
+  <description brief="hearbo_cart_joy">
+
+     hearbo_cart_joy
+
+  </description>
+  <author>user</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hearbo_cart_joy</url>
+  <depend package="roscpp"/>
+  <depend package="joystick_hri"/>
+  <depend package="hearbo_cart_msgs"/>
+
+</package>
+
+

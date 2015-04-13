@@ -1,0 +1,114 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec109908193/fast"
+make[1]: Entering directory `/home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec109908193.dir/build.make CMakeFiles/cmTryCompileExec109908193.dir/build
+make[2]: Entering directory `/home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec109908193.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec109908193.dir/CheckSymbolExists.c.o   -c /home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTryCompileExec109908193
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec109908193.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec109908193.dir/CheckSymbolExists.c.o  -o cmTryCompileExec109908193 -rdynamic 
+CMakeFiles/cmTryCompileExec109908193.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+make[2]: *** [cmTryCompileExec109908193] Error 1
+make[2]: Leaving directory `/home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+make[1]: *** [cmTryCompileExec109908193/fast] Error 2
+make[1]: Leaving directory `/home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+
+File /home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec1470197522/fast"
+make[1]: Entering directory `/home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1470197522.dir/build.make CMakeFiles/cmTryCompileExec1470197522.dir/build
+make[2]: Entering directory `/home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1470197522.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec1470197522.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec1470197522
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1470197522.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTryCompileExec1470197522.dir/CheckFunctionExists.c.o  -o cmTryCompileExec1470197522 -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[2]: *** [cmTryCompileExec1470197522] Error 1
+make[2]: Leaving directory `/home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+make[1]: *** [cmTryCompileExec1470197522/fast] Error 2
+make[1]: Leaving directory `/home/praveen/Documents/ROS/tmp/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec661980050/fast"
+make[1]: Entering directory `/home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec661980050.dir/build.make CMakeFiles/cmTryCompileExec661980050.dir/build
+make[2]: Entering directory `/home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec661980050.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec661980050.dir/CheckSymbolExists.c.o   -c /home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTryCompileExec661980050
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec661980050.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec661980050.dir/CheckSymbolExists.c.o  -o cmTryCompileExec661980050 -rdynamic 
+CMakeFiles/cmTryCompileExec661980050.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+make[2]: *** [cmTryCompileExec661980050] Error 1
+make[2]: Leaving directory `/home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+make[1]: *** [cmTryCompileExec661980050/fast] Error 2
+make[1]: Leaving directory `/home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+
+File /home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec349860512/fast"
+make[1]: Entering directory `/home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTryCompileExec349860512.dir/build.make CMakeFiles/cmTryCompileExec349860512.dir/build
+make[2]: Entering directory `/home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec349860512.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec349860512.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec349860512
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec349860512.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTryCompileExec349860512.dir/CheckFunctionExists.c.o  -o cmTryCompileExec349860512 -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+make[2]: *** [cmTryCompileExec349860512] Error 1
+make[2]: Leaving directory `/home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+make[1]: *** [cmTryCompileExec349860512/fast] Error 2
+make[1]: Leaving directory `/home/praveen/catkin_ws/src/BUD-E/hearbo_setup_tf/build/CMakeFiles/CMakeTmp'
+
+

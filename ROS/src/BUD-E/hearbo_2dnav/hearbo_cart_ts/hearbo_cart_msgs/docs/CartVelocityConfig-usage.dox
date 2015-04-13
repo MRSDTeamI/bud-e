@@ -1,0 +1,10 @@
+\subsubsection usage Usage
+\verbatim
+<node name="CartVelocityPublisherByDynReconf" pkg="hearbo_cart_msgs" type="CartVelocityPublisherByDynReconf">
+  <param name="stop" type="bool" value="False" />
+  <param name="velocity_x" type="double" value="0.0" />
+  <param name="velocity_y" type="double" value="0.0" />
+  <param name="velocity_rot" type="double" value="0.0" />
+</node>
+\endverbatim
+

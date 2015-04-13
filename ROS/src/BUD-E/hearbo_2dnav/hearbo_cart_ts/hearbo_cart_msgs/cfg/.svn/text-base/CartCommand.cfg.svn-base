@@ -1,0 +1,94 @@
+#! /usr/bin/env python
+
+PACKAGE='hearbo_cart_msgs'
+import roslib; roslib.load_manifest(PACKAGE)
+
+from dynamic_reconfigure.parameter_generator import *
+
+gen = ParameterGenerator()
+
+# overall settings
+
+gen.add("publish_flag", bool_t, 0, "Switch for publishing the message", False)
+
+# drive_flag related settings
+
+gen.add("drive_flag", bool_t, 0, "drive flag", False)
+
+enum = gen.enum([ 
+gen.const("STOP_MODE", int_t, 0, "STOP MODE"),
+gen.const("TURN_MODE", int_t, 1, "TURN MODE"),
+gen.const("DRIVE_MODE", int_t, 2, "DRIVE MODE"),
+gen.const("MANUAL_MODE", int_t, 3, "MANUAL MODE"),
+gen.const("RESTART_MODE", int_t, 4, "RESTART MODE") ], "An enum to set the driving mode.")
+
+gen.add("drive_mode", int_t, 0, "driving mode",0, 0, 4, edit_method = enum)
+
+gen.add("drive_id_0", bool_t, 0, "Activate left front wheel", False)
+gen.add("drive_id_1", bool_t, 0, "Activate left back wheel", False)
+gen.add("drive_id_2", bool_t, 0, "Activate right back wheel", False)
+gen.add("drive_id_3", bool_t, 0, "Activate right front wheel", False)
+
+gen.add("each_vel_0", double_t, 0, "velocity of left front wheel [mm/s] (MANUAL_MODE)",0, -20.0, 20.0)
+gen.add("each_vel_1", double_t, 0, "velocity of left back wheel [mm/s] (MANUAL_MODE)",0, -20.0, 20.0)
+gen.add("each_vel_2", double_t, 0, "velocity of right back wheel [mm/s] (MANUAL_MODE)",0, -20.0, 20.0)
+gen.add("each_vel_3", double_t, 0, "velocity of right front wheel [mm/s] (MANUAL_MODE)",0, -20.0, 20.0)
+
+gen.add("each_ang_0", double_t, 0, "steering angle of left front wheel [deg] (MANUAL_MODE)",0, -180.0, 180.0)
+gen.add("each_ang_1", double_t, 0, "steering angle of left back wheel [deg] (MANUAL_MODE)",0, -180.0, 180.0)
+gen.add("each_ang_2", double_t, 0, "steering angle of right back wheel [deg] (MANUAL_MODE)",0, -180.0, 180.0)
+gen.add("each_ang_3", double_t, 0, "steering angle of right front wheel [deg] (MANUAL_MODE)",0, -180.0, 180.0)
+
+gen.add("all_vel", double_t, 0, "velocity of left front wheel [mm/s]",0, -50.0, 50.0)
+
+gen.add("all_ang", double_t, 0, "steering angle of left front wheel [deg]",0, -180.0, 180.0)
+
+# gain_flag related settings
+
+gen.add("gain_flag", bool_t, 0, "gain flag", False)
+
+gen.add("gain_id_ch0_0", bool_t, 0, "Activate gain change of left front driving wheel", False)
+gen.add("gain_id_ch0_1", bool_t, 0, "Activate gain change of left back driving wheel", False)
+gen.add("gain_id_ch0_2", bool_t, 0, "Activate gain change of right back driving wheel", False)
+gen.add("gain_id_ch0_3", bool_t, 0, "Activate gain change of right front driving wheel", False)
+
+gen.add("gain_ch0_0", int_t, 0, "gain of left front driving wheel",0, -32768, 32767)
+gen.add("gain_ch0_1", int_t, 0, "gain of left back driving wheel",0, -32768, 32767)
+gen.add("gain_ch0_2", int_t, 0, "gain of right back driving wheel",0, -32768, 32767)
+gen.add("gain_ch0_3", int_t, 0, "gain of right front driving wheel",0, -32768, 32767)
+
+gen.add("gain_id_ch1_0", bool_t, 0, "Activate gain change of left front steering motor", False)
+gen.add("gain_id_ch1_1", bool_t, 0, "Activate gain change of left back steering motor", False)
+gen.add("gain_id_ch1_2", bool_t, 0, "Activate gain change of right back steering motor", False)
+gen.add("gain_id_ch1_3", bool_t, 0, "Activate gain change of right front steering motor", False)
+
+gen.add("gain_ch1_0", int_t, 0, "gain of left front steering motor",0, -32768, 32767)
+gen.add("gain_ch1_1", int_t, 0, "gain of left back steering motor",0, -32768, 32767)
+gen.add("gain_ch1_2", int_t, 0, "gain of right back steering motor",0, -32768, 32767)
+gen.add("gain_ch1_3", int_t, 0, "gain of right front steering motor",0, -32768, 32767)
+
+# encoder_flag related settings
+
+gen.add("encoder_flag", bool_t, 0, "encoder flag", False)
+
+gen.add("encoder_id_ch0_0", bool_t, 0, "Activate encoder reset of left front driving wheel", False)
+gen.add("encoder_id_ch0_1", bool_t, 0, "Activate encoder reset of left back driving wheel", False)
+gen.add("encoder_id_ch0_2", bool_t, 0, "Activate encoder reset of right back driving wheel", False)
+gen.add("encoder_id_ch0_3", bool_t, 0, "Activate encoder reset of right front driving wheel", False)
+
+gen.add("encoder_ch0_0", int_t, 0, "encoder value of left front driving wheel",0, -32768, 32767)
+gen.add("encoder_ch0_1", int_t, 0, "encoder value of left back driving wheel",0, -32768, 32767)
+gen.add("encoder_ch0_2", int_t, 0, "encoder value of right back driving wheel",0, -32768, 32767)
+gen.add("encoder_ch0_3", int_t, 0, "encoder value of right front driving wheel",0, -32768, 32767)
+
+gen.add("encoder_id_ch1_0", bool_t, 0, "Activate encoder reset of left front steering motor", False)
+gen.add("encoder_id_ch1_1", bool_t, 0, "Activate encoder reset of left back steering motor", False)
+gen.add("encoder_id_ch1_2", bool_t, 0, "Activate encoder reset of right back steering motor", False)
+gen.add("encoder_id_ch1_3", bool_t, 0, "Activate encoder reset of right front steering motor", False)
+
+gen.add("encoder_ch1_0", int_t, 0, "encoder value of left front steering motor",0, -32768, 32767)
+gen.add("encoder_ch1_1", int_t, 0, "encoder value of left back steering motor",0, -32768, 32767)
+gen.add("encoder_ch1_2", int_t, 0, "encoder value of right back steering motor",0, -32768, 32767)
+gen.add("encoder_ch1_3", int_t, 0, "encoder value of right front steering motor",0, -32768, 32767)
+
+exit(gen.generate(PACKAGE, "CartCommandPublisherByDynReconf", "CartCommand"))

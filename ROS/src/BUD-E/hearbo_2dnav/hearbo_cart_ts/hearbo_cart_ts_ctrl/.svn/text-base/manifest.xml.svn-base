@@ -1,0 +1,17 @@
+<package>
+  <description brief="Robot Interface">
+     This package contains the interface between ROS and the existing servers on the robot.
+  </description>
+  <author>Olivier Chatot</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url></url>
+  
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+  <depend package="hearbo_cart_msgs"/>
+  
+</package>
+
+

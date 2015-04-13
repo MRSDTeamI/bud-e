@@ -1,0 +1,55 @@
+To run navigation on robot no. 2:
+
+Initial steps:
+
+1. Set up the ip address of the laptop
+
+--> sudo ifconfig eth0 172.24.49.100 netmask 255.255.255.0
+
+2. Acess the permission for the LIDAR(Hokuyo)
+
+--> sudo chmod a+rw/dev/ttyACM0
+
+3. Now, running the navigation
+
+--> cd /home/gautam/hearbo_2dnav   [general: cd ~/hearbo_2dnav]
+
+4. Launch the 2 launch files:
+
+Hearbo Configuration File:
+
+--> roslaunch hearbo_configuration.launch
+
+Move_base File:
+
+--> roslaunch move_base.launch
+
+4. Run the cart control node:
+
+--> rosrun hearbo_cart_ts_ctrl cart_control
+
+5. Vizualize it in Rviz
+
+--> rosrun rviz rviz
+
+Select the navigation configuration file : ~/.rviz/hearbo_navigation.rviz 
+
+
+Optional(1):
+
+To combine the VSLAM and the 2D VO for navigation:
+
+Perform all the above steps and then start the CCNY package for 3D SLAM:
+
+--> roslaunch ccny_openni_launch openni.launch
+
+--> roslaunch ccny_rgbd vo+mapping.launch
+
+
+Optional(2):
+
+To further give goals based on the sound source localization feature of HARK:
+
+Talk to Keisuke-san
+
+Note: The final navigation file is : ~/.rviz/hearbo_navigation_final.rviz  			--> just ask keisuke-san to 													    include the marker display type

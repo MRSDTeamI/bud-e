@@ -1,0 +1,39 @@
+RUN 1:
+9.3 mins
+Resolution:0.01
+Goal: x:17.8
+y: 7.48
+z=0.0
+W=1.0
+
+Obs: Slow movement even though max_vel=0.8 coz of finer map.
+
+
+
+
+
+RUN2:
+GOAL:
+x:8.14
+y:-2.84
+z:0.00312
+
+ROBOT:
+x:8.1
+y:-2.94
+
+
+RUN 3:
+
+GOal x:20.85
+
+Goal y:10.53
+z=0.0013
+
+RObot x: 20.78
+Robot y: 10.50
+z:0.0
+
+
+	
+

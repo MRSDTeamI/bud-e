@@ -1,0 +1,24 @@
+# BUD-E Responds to speech via speech
+
+rosrun sound_play soundplay_node.py
+
+rosrun BUDE_Speech talkback.py
+
+roslaunch BUDE_Speech recognizer.launch
+
+
+# 
+
+rostopic pub [action_ns]/goal [action_type]ActionGoal [fill in fields here]
+
+rostopic pub /move_base_simple/goal geometry_msgs/PoseStamped '{header: {stamp: now, frame_id: "map"}, pose: {position: {x: 1.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}'
+
+# Manipulator
+
+roslaunch smart_arm_controller smart_arm.launch
+
+rostopic pub -1 /shoulder_pan_controller/command std_msgs/Float64 -- -1
+
+rostopic pub -1 /shoulder_pitch_controller/command std_msgs/Float64 -- -1
+
+rostopic pub -1 /elbow_flex_controller/command std_msgs/Float64 -- -1

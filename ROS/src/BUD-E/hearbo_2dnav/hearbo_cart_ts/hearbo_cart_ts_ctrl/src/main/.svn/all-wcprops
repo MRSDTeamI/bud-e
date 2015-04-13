@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_ts_ctrl/src/main
+END
+RobotClient.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_ts_ctrl/src/main/RobotClient.cpp
+END
+CartCommandMaker.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_ts_ctrl/src/main/CartCommandMaker.cpp
+END
+RobotClient.h
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_ts_ctrl/src/main/RobotClient.h
+END
+CartControl.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_ts_ctrl/src/main/CartControl.cpp
+END
+CartCommandMaker.h
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_ts_ctrl/src/main/CartCommandMaker.h
+END
+constants.h
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svnMicarray/!svn/ver/1240/trunk/ROS/HEARBO/stacks_groovy/hearbo_cart_ts/hearbo_cart_ts_ctrl/src/main/constants.h
+END
