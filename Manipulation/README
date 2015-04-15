@@ -1,0 +1,8 @@
+To run the script that listens to a ROS topic and moves the arm to a given x,y,z coordinate, run:
+
+jw_budeArmControl.py
+
+Then on a different terminal, manually input x,y,z to the ROS topic "bottle_center":
+
+rostopic pub bottle_center geometry_msgs/Vector3 -- 0.3 0 0.2
+
