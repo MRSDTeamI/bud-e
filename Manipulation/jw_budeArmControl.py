@@ -40,12 +40,13 @@ import copy
 import rospy
 import moveit_commander
 import moveit_msgs.msg
-from geometry_msgs.msg import Vector3
+import geometry_msgs.msg
 
 from std_msgs.msg import String
 
 # For debugging purposes
 debug = 0;
+joint_vals = 1;  # Take joint values (4) as input or x,y,z for pose
 
 class budeArmCommander():
 
@@ -69,7 +70,10 @@ class budeArmCommander():
     self.group.set_planner_id("RRTkConfigDefault")
     #self.group.set_planner_id("SBLkConfigDefault")
 
-    rospy.Subscriber("bottle_center", Vector3, self.callback)
+    if joint_vals:
+        rospy.Subscriber("bottle_center", String, self.callback)
+    else:
+        rospy.Subscriber("bottle_center", geometry_msgs.msg.Vector3, self.callback)
 
     while not rospy.is_shutdown():
       rospy.sleep(1)
@@ -80,7 +84,10 @@ class budeArmCommander():
 
   # end_coord is a geometry/Vector3 object
   def callback(self, end_coord):
-    rospy.loginfo(rospy.get_caller_id() + " ^^^^  %f %f %f", end_coord.x, end_coord.y, end_coord.z)
+    if joint_vals:
+        rospy.loginfo(rospy.get_caller_id() + " ^^^^  %s", end_coord)
+    else:
+        rospy.loginfo(rospy.get_caller_id() + " ^^^^  %f %f %f", end_coord.x, end_coord.y, end_coord.z)
 
     if debug:
       self.print_joint_state()
@@ -118,38 +125,63 @@ class budeArmCommander():
     end_eff = self.group.get_end_effector_link()
     #print end_eff
 
-    ps = self.group.get_current_pose()
-    ps.pose.position.x = end_coord.x
-    ps.pose.position.y = end_coord.y
-    ps.pose.position.z = end_coord.z
+    if joint_vals:
+        print type(end_coord.data)
+        new_coord = str.split(end_coord.data)
+        print new_coord
+        """
+        Joint variable names:
+          arm_base_joint
+          shoulder_pan_joint
+          shoulder_pitch_joint
+          elbow_flex_joint
+          wrist_roll_joint
 
-    #ps.pose.position.x = 0.2404
-    #ps.pose.position.y = 0.2130
-    #ps.pose.position.z = 0.1802
-    #ps.pose.orientation.x = -0.0290
-    #ps.pose.orientation.y = -0.0219
-    #ps.pose.orientation.z = 0.3469
-    #ps.pose.orientation.w = 0.93716
-    new_pose = self.group.get_random_pose(end_eff)
-    #print "---- Random Pose ----"
-    #print new_pose
+        Arm straight up joint values:
+          -0.2198  1.7  1.242  -0.1891
+        """
+        print len(new_coord)
+        self.group.set_joint_value_target([float(new_coord[0]), float(new_coord[1]), 
+            float(new_coord[2]), float(new_coord[3])])
+        print self.group.get_joints()
+        print self.group.get_current_joint_values()   
 
-    new_pose = self.group.get_current_pose()
-    #print "---- Current Pose ----"
-    #print new_pose
-    #print self.group.get_planning_frame()
-    #print type(ps.pose)
+    else:
+        ps = self.group.get_current_pose()
+        ps.pose.position.x = end_coord.x
+        ps.pose.position.y = end_coord.y
+        ps.pose.position.z = end_coord.z
+        #ps = geometry_msgs.msg.Pose()
+        #ps.position.x = end_coord.x
+        #ps.position.y = end_coord.y
+        #ps.position.z = end_coord.z
+        #ps.orientation.w = 1
 
-    self.group.set_joint_value_target(ps.pose,None,True)
+        #ps.pose.position.x = 0.2404
+        #ps.pose.position.y = 0.2130
+        #ps.pose.position.z = 0.1802
+        #ps.pose.orientation.x = -0.0290
+        #ps.pose.orientation.y = -0.0219
+        #ps.pose.orientation.z = 0.3469
+        #ps.pose.orientation.w = 0.93716
+        #new_pose = self.group.get_random_pose(end_eff)
+        #print "---- Random Pose ----"
+        #print new_pose
 
-    #print self.group.get_pose_reference_frame()
-    #self.group.set_pose_target(ps, end_eff)
-    #self.group.set_pose_target(new_pose)
+        #new_pose = self.group.get_current_pose()
+        #print "---- Current Pose ----"
+        #print new_pose
+        #print self.group.get_planning_frame()
+        #print type(ps.pose)
 
-    #self.group.set_position_target([end_coord.x, end_coord.y, end_coord.z], end_eff)
-    #self.group.set_position_target([end_coord.x, end_coord.y, end_coord.z]) 
+        #print self.group.get_pose_reference_frame()
+        #self.group.set_pose_target(new_pose)
 
-    #self.group.set_pose_target(ps)
+        #self.group.set_position_target([end_coord.x, end_coord.y, end_coord.z], end_eff)
+        #self.group.set_position_target([end_coord.x, end_coord.y, end_coord.z]) 
+
+        #self.group.set_pose_target(ps)
+
     #print self.group.get_goal_tolerance()
 
   	## Now, we call the planner to compute the plan
@@ -166,6 +198,9 @@ class budeArmCommander():
 
     rospy.sleep(5)
     self.group.go(wait=True)
+
+    print "Joint values AFTER:"
+    print self.group.get_current_joint_values()
 
     print "DONE"
 
