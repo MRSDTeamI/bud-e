@@ -1,8 +1,20 @@
-To run the script that listens to a ROS topic and moves the arm to a given x,y,z coordinate, run:
+RUN WITH X,Y,Z COORDINATE TO SET POSE
 
-jw_budeArmControl.py
+Change the variable "joint_vals" in jw_budeArmControl.py to "0". Then run:
+
+$ jw_budeArmControl.py
 
 Then on a different terminal, manually input x,y,z to the ROS topic "bottle_center":
 
-rostopic pub bottle_center geometry_msgs/Vector3 -- 0.3 0 0.2
+$ rostopic pub bottle_center geometry_msgs/Vector3 -- 0.3 0 0.2
 
+----------------------------------------------------------------------------------------
+RUN WITH JOINT VALUES
+
+Change the variable "joint_vals" in jw_budeArmControl.py to "0". Then run:
+
+$ jw_budeArmControl.py
+
+Then on a different terminal, manually input 4 floats separated by spaces to "bottle_center":
+
+$ rostopic pub bottle_center std_msgs/String -- "0 1.7 0 0"
