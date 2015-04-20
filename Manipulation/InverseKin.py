@@ -9,8 +9,11 @@ import sys
 
 import ForwardKin as fk
 
-# use debug values
+# Use debug values
 debug = 1
+# Use DLS method instead of screw theory.
+# This may prevent singular matrix error.
+use_dls = 1
 
 ###
 # Tweak values at end of __init__
@@ -34,9 +37,13 @@ class InverseKin:
                 sys.exit(-1)
 
         # Set initial values
-        self.theta = [0.1, 0.2, 0.3, 0.4]  # initial joint angles
+        self.theta = [0.0, 0.0, 0.0]  # initial joint angles
+
+        ## These values can be tweaked to for IK performance
         self.num_iter = 1000  # 1000 loops to find the inverse kinematics
         self.time_step = 0.01
+        self.dls_lambda = 0.01
+
         # Desired final position, orientation
         # NOTE: this needs to be updated if desired pose is updated in a function later
         pose_mat = np.matrix(f_pose)
@@ -198,6 +205,10 @@ class InverseKin:
             # Calculate the pose of next frame
             # 6x6 matrix
             sq_mat = np.dot(tmp_jacobian, tmp_jacobian.transpose())
+            if use_dls:
+                print sq_mat
+                sq_mat = np.add(sq_mat, np.dot(self.dls_lambda**2, np.eye(6)))
+
             inv_jac = inv(sq_mat)
             #print np.allclose(np.dot(sq_mat, inv_jac), np.eye(6))
             #print "inv"
@@ -223,5 +234,5 @@ class InverseKin:
         print self.theta
 
 if __name__ == "__main__":
-    ik = InverseKin([0.16320, 1.00402, 1.42058, -0.29301, 0.41901, 0.84979, 0.12817])
+    ik = InverseKin([0.1420, 0.0, 0.2696, 0.0, 0.0, 0.0, 1.0])
     ik.solve_ik()
