@@ -18,3 +18,25 @@ $ jw_budeArmControl.py
 Then on a different terminal, manually input 4 floats separated by spaces to "bottle_center":
 
 $ rostopic pub bottle_center std_msgs/String -- "0 1.7 0 0"
+
+---------------------------------------------------------------------------------------
+
+RUN WITH IK SOLVER AND JOINT CONTROL
+
+Change to debug=0 in InverseKin.py.
+
+Copy launch files into BUD-E_arm_moveit/launch.
+
+Start the arm controllers.
+
+$ roslaunch BUD-E_arm_moveit base.launch
+$ roslaunch BUD-E_arm_moveit meta.launch
+
+Run IK solver
+
+$ ./InverseKin.py
+
+In another terminal, manually input the desired end position:
+
+$ rostopic pub bottle_center geometry_msgs/Vector3 -- 0.1 0 0.35
+
