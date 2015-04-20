@@ -44,9 +44,11 @@ import rospy
 import geometry_msgs.msg
 
 import ForwardKin as fk
+import jw_joint_ctrl as joint_ctrl
+
 
 # Use debug values instead of listening to ROS topic
-debug = 1
+debug = 0
 # Use DLS method instead of screw theory.
 # This may prevent singular matrix error.
 use_dls = 1
@@ -124,7 +126,10 @@ class InverseKin:
         self.des_q_r = pose_mat[0, 6]    # desired real part of quaternion
         self.des_q_i = pose_mat[0, 3:6]  # desired imaginary parts of quaternion
 
-        self.solve_ik()
+        # Get list of joint angles
+        joint_angles = self.solve_ik()
+
+        self.set_joint_angles(joint_angles)
 
     def jacobian_mat_gen(self, joint_theta):
 
@@ -300,6 +305,30 @@ class InverseKin:
             self.theta = self.theta + tmp1.getA1()
 
         print self.theta
+        return self.theta
+
+    def set_joint_angles(self, angles):
+        '''
+        Set joint angles of the arm through dynamixel helper class.
+        
+    
+        '''
+        if isinstance(angles, np.ndarray):
+            angles = angles.tolist()
+
+        # If using only 3 DoF solver of IK, we will only get 3 joint angles.
+        # The jw_joint_ctrl class expects 4 joint angles for:
+        #   shoulder_pan_joint, shoulder_pitch_joint, elbow_flex_joint, wrist_roll_joint
+        # We can generally leave wrist to be 0
+        if len(angles) == 3:
+            angles.extend([0.0])
+
+        # Looks like the IK values are opposite of actual joint angles
+        angles = [-1*a for a in angles]
+        print angles
+
+        jctrl = joint_ctrl.Joint()
+        jctrl.move_joint(angles)
 
 if __name__ == "__main__":
 
@@ -313,4 +342,4 @@ if __name__ == "__main__":
             ik = InverseKin()
 
     except rospy.ROSInterruptException:
-        sys.exit(-1)
+         sys.exit(-1)
