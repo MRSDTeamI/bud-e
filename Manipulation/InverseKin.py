@@ -90,6 +90,7 @@ class InverseKin:
             self.des_pos = pose_mat[0, 0:3]  # desired position
             self.des_q_r = pose_mat[0, 6]    # desired real part of quaternion
             self.des_q_i = pose_mat[0, 3:6]  # desired imaginary parts of quaternion
+            self.motor1_angle = np.arctan2(pose_mat[0,1], pose_mat[0,0])
 
         # Set initial values
         self.theta = [0.0, 0.0, 0.0]  # initial joint angles
@@ -125,6 +126,7 @@ class InverseKin:
         self.des_pos = pose_mat[0, 0:3]  # desired position
         self.des_q_r = pose_mat[0, 6]    # desired real part of quaternion
         self.des_q_i = pose_mat[0, 3:6]  # desired imaginary parts of quaternion
+        self.motor1_angle = np.arctan2(pose_mat[0,1],  pose_mat[0,0])
 
         # Get list of joint angles
         joint_angles = self.solve_ik()
@@ -303,6 +305,8 @@ class InverseKin:
             #print self.theta
             #print tmp1
             self.theta = self.theta + tmp1.getA1()
+            # i+1 so we don't divide by 0
+            self.theta[0] = self.motor1_angle / (i+1) * self.num_iter
 
         print self.theta
         return self.theta
@@ -323,8 +327,8 @@ class InverseKin:
         if len(angles) == 3:
             angles.extend([0.0])
 
-        # Looks like the IK values are opposite of actual joint angles
-        angles = [-1*a for a in angles]
+        # The 2nd and 3rd joint values are flipped
+        angles = [angles[0], -1*angles[1], -1*angles[2], angles[3]]
         print angles
 
         jctrl = joint_ctrl.Joint()
