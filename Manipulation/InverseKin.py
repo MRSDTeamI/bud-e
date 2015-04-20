@@ -71,6 +71,11 @@ class InverseKin:
         self.des_q_r = None
         self.des_q_i = None
 
+        # FK solver
+        self.fk = fk.ForwardKin()
+        # Joint controller class to help us move the arm
+        self.jctrl = joint_ctrl.Joint()
+
         # Only listen to topic for bottle coordinate if we're not debugging
         if not debug:
             rospy.Subscriber("bottle_center", geometry_msgs.msg.Vector3, self.callback)
@@ -99,9 +104,6 @@ class InverseKin:
         self.num_iter = 1000  # 1000 loops to find the inverse kinematics
         self.time_step = 0.01
         self.dls_lambda = 0.01
-
-        # FK solver
-        self.fk = fk.ForwardKin()
 
         # Only spin and wait if we're not debugging
         if not debug:
@@ -331,8 +333,7 @@ class InverseKin:
         angles = [angles[0], -1*angles[1], -1*angles[2], angles[3]]
         print angles
 
-        jctrl = joint_ctrl.Joint()
-        jctrl.move_joint(angles)
+        self.jctrl.move_joint(angles)
 
 if __name__ == "__main__":
 

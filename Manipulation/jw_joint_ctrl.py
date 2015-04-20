@@ -9,7 +9,7 @@ import trajectory_msgs.msg
 import control_msgs.msg  
 from trajectory_msgs.msg import JointTrajectoryPoint
 from control_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal, FollowJointTrajectoryAction, FollowJointTrajectoryGoal
-
+from dynamixel_msgs.msg import JointState
 
 
 class Joint:
@@ -19,7 +19,12 @@ class Joint:
         self.jta.wait_for_server()
         rospy.loginfo('Found joint trajectory action!')
 
-            
+        rospy.Subscriber("shoulder_pan_joint/state", JointState, self.callback)
+       
+        rospy.sleep(1)  # so we have some time to get pan_angle from the callback
+ 
+        self.move_home()
+
     def move_joint(self, angles):
         goal = FollowJointTrajectoryGoal()                      
         goal.trajectory.joint_names = ['shoulder_pan_joint', 'shoulder_pitch_joint','elbow_flex_joint','wrist_roll_joint']
@@ -28,7 +33,27 @@ class Joint:
         point.time_from_start = rospy.Duration(3)                       
         goal.trajectory.points.append(point)
         self.jta.send_goal_and_wait(goal)
-              
+
+    def callback(self, data):
+        self.pan_angle = data.current_pos
+
+    def move_home(self):
+        '''
+        Move to HOME joint angles of [0, -1.4, 1.5, 0]
+        Move in pieces so we don't accidentally bump into restricted areas (corners of
+        the base the arm is mounted to.
+
+        Final configuration should be [0, -1.4, 1.5, 0] where the arm rests in front like an
+        elephant trunk (with the end-effector pointing forward).
+
+        '''
+        # Move elbow_flex up to level first
+        self.move_joint([self.pan_angle, -0.5, 0, 0])
+        # Move should_pan to 0
+        self.move_joint([0, -0.5, 0, 0])
+        # Move elbow down to default position
+        self.move_joint([0, -1.4, 1.5, 0])
+        
 
 def main():
         arm = Joint()
