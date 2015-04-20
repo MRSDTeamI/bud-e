@@ -1,15 +1,51 @@
 #!/usr/bin/python
 
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2013, Johnny Wang
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of SRI International nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Author: Johnny Wang
+
 # Given final position and orientation, find the joint angles
 
 import numpy as np
 from scipy.linalg import expm
 from numpy.linalg import inv
 import sys
+import rospy
+import geometry_msgs.msg
 
 import ForwardKin as fk
 
-# Use debug values
+# Use debug values instead of listening to ROS topic
 debug = 1
 # Use DLS method instead of screw theory.
 # This may prevent singular matrix error.
@@ -27,6 +63,16 @@ class InverseKin:
     def __init__(self, f_pose=None):
         self.NUM_POSE = 7  # 3 position 4 orientation
 
+        # Need these values to solve for IK. Decalre them here so we can error check
+        # at the start of solve_ik.
+        self.des_pos = None
+        self.des_q_r = None
+        self.des_q_i = None
+
+        # Only listen to topic for bottle coordinate if we're not debugging
+        if not debug:
+            rospy.Subscriber("bottle_center", geometry_msgs.msg.Vector3, self.callback)
+
         if type(f_pose) is list:
             #print len(f_pose)
             if len(f_pose) == self.NUM_POSE:
@@ -36,6 +82,13 @@ class InverseKin:
                     self.NUM_POSE)
                 sys.exit(-1)
 
+            # Desired final position, orientation
+            # NOTE: this needs to be updated if desired pose is updated in a function later
+            pose_mat = np.matrix(f_pose)
+            self.des_pos = pose_mat[0, 0:3]  # desired position
+            self.des_q_r = pose_mat[0, 6]    # desired real part of quaternion
+            self.des_q_i = pose_mat[0, 3:6]  # desired imaginary parts of quaternion
+
         # Set initial values
         self.theta = [0.0, 0.0, 0.0]  # initial joint angles
 
@@ -44,14 +97,14 @@ class InverseKin:
         self.time_step = 0.01
         self.dls_lambda = 0.01
 
-        # Desired final position, orientation
-        # NOTE: this needs to be updated if desired pose is updated in a function later
-        pose_mat = np.matrix(f_pose)
-        self.des_pos = pose_mat[0, 0:3]  # desired position
-        self.des_q_r = pose_mat[0, 6]    # desired real part of quaternion
-        self.des_q_i = pose_mat[0, 3:6]  # desired imaginary parts of quaternion
         # FK solver
         self.fk = fk.ForwardKin()
+
+        # Only spin and wait if we're not debugging
+        if not debug:
+            # spin
+            while not rospy.is_shutdown():
+                rospy.sleep(1)
 
     def adjoint(self, g_mat):
         p_hat = self.fk.hat_operator(g_mat[0:3, 3])
@@ -61,6 +114,17 @@ class InverseKin:
         output_mat = np.concatenate((output_mat, term2), axis=0)
 
         return output_mat
+
+    def callback(self, end_coord):
+        # Set the desired final position, orientation
+        # Since we are taking in only position, we set orientation to [0 0 0 1]
+        f_pose = [end_coord.x, end_coord.y, end_coord.z, 0, 0, 0, 1]
+        pose_mat = np.matrix(f_pose)
+        self.des_pos = pose_mat[0, 0:3]  # desired position
+        self.des_q_r = pose_mat[0, 6]    # desired real part of quaternion
+        self.des_q_i = pose_mat[0, 3:6]  # desired imaginary parts of quaternion
+
+        self.solve_ik()
 
     def jacobian_mat_gen(self, joint_theta):
 
@@ -168,6 +232,10 @@ class InverseKin:
     
     def solve_ik(self):
 
+        if self.des_pos == None or self.des_q_r == None or self.des_q_i == None:
+            print "ERROR: Need to set desired position before solving IK."
+            sys.exit(-1)
+
         for i in range(self.num_iter):
             self.fk.set_joints(self.theta)
             tip_pose = self.fk.solve_fk()  # tip_pose is 4x4 with rotation and translation
@@ -206,7 +274,7 @@ class InverseKin:
             # 6x6 matrix
             sq_mat = np.dot(tmp_jacobian, tmp_jacobian.transpose())
             if use_dls:
-                print sq_mat
+                #print sq_mat
                 sq_mat = np.add(sq_mat, np.dot(self.dls_lambda**2, np.eye(6)))
 
             inv_jac = inv(sq_mat)
@@ -234,5 +302,15 @@ class InverseKin:
         print self.theta
 
 if __name__ == "__main__":
-    ik = InverseKin([0.1420, 0.0, 0.2696, 0.0, 0.0, 0.0, 1.0])
-    ik.solve_ik()
+
+    rospy.init_node('ik_solver', anonymous=True)
+
+    try:
+        if debug:
+            ik = InverseKin([0.1420, 0.0, 0.2696, 0.0, 0.0, 0.0, 1.0])
+            ik.solve_ik()
+        else:
+            ik = InverseKin()
+
+    except rospy.ROSInterruptException:
+        sys.exit(-1)
