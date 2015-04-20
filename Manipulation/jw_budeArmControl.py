@@ -46,7 +46,7 @@ from std_msgs.msg import String
 
 # For debugging purposes
 debug = 0;
-joint_vals = 1;  # Take joint values (4) as input or x,y,z for pose
+joint_vals = 0;  # Take joint values (4) as input or x,y,z for pose
 
 class budeArmCommander():
 
@@ -173,6 +173,7 @@ class budeArmCommander():
         #print new_pose
         #print self.group.get_planning_frame()
         #print type(ps.pose)
+        self.group.set_joint_value_target(ps,None,True)
 
         #print self.group.get_pose_reference_frame()
         #self.group.set_pose_target(new_pose)
