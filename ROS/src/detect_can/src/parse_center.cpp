@@ -72,12 +72,13 @@ std::cerr << "----------------" << std::endl;
 				//arm_output.y = y * 100;
 				//arm_output.z = z * 100;
 				
-				double kinect_depth = 0.28; // Kinect is 11 inches (28cm) behind the arm.
-				double kinect_height = 0.2; // Kinect is 8 inches (20cm) above the arm.
+				double kinect_depth = 0.30; // Kinect is ~30cm behind the arm.
+				double kinect_height = 0.2; // Kinect is ~20cm above the arm.
 				double bottle_ht = 0.088;   // approx. bottle center height (above gnd plane)
+                double kinect_x_coeff = 0.14; // For some reason, it keeps reporting objects 15cm off.
 				
 				arm_output.x = z - kinect_depth;
-				arm_output.y = x;
+				arm_output.y = x - kinect_x_coeff;
 				arm_output.z = y - kinect_height + bottle_ht;
 				pub_bot.publish(arm_output);
 
