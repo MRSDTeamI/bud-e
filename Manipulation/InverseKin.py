@@ -45,6 +45,7 @@ import sys
 import rospy
 import geometry_msgs.msg
 import std_msgs.msg
+from dynamixel_msgs.msg import MotorState, MotorStateList
 
 import ForwardKin as fk
 import jw_joint_ctrl as joint_ctrl
@@ -87,6 +88,12 @@ class InverseKin:
             self.jctrl = joint_ctrl.Joint()
             # To get bottle's center coordinate
             rospy.Subscriber("bottle_center", geometry_msgs.msg.Vector3, self.callback)
+            # To get the load of the gripper servo
+            self.gripper_id = 7
+            self.gripper_load = 0.0
+            self.gripper_grasp = -0.5
+            self.gripper_release = -1.5
+            rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
             # To tell navigation we're done 
             self.pub = rospy.Publisher('bude_goback', std_msgs.msg.Bool)
 
@@ -131,6 +138,10 @@ class InverseKin:
         return output_mat
 
     def callback(self, end_coord):
+        '''
+        Solve for the IK whenever we get bottle's center coordinate.
+
+        '''
         # Set the desired final position, orientation
         # Since we are taking in only position, we set orientation to [0 0 0 1]
         f_pose = [end_coord.x, end_coord.y, end_coord.z, 0, 0, 0, 1]
@@ -150,6 +161,42 @@ class InverseKin:
         # Get list of joint angles
         joint_angles = self.solve_ik()
 
+        # Move arm to bottle and grasp it
+        grasp_success = self.grasp_bottle(joint_angles)
+
+        ## NOTE: if not success, retry? Do this by reseting parse_center???
+        if not grasp_success:
+            print "FAILED to grasp: retry somehow"
+        else:
+            # Move arm to basket and drop bottle
+            self.set_joint_angles([0, 1.7, 1.7, 0, self.gripper_grasp])
+            self.set_joint_angles([0, 1.7, 1.7, 0, self.gripper_release])
+            # Tell nav to go back
+            self.pub.publish(std_msgs.msg.Bool(True))
+
+    def motor_states_callback(self, states_list):
+        '''
+        Go through the motor states list and grab the "load" of the gripper motor. From this
+        we can tell if the bottle has been grasped.
+
+        '''
+        for m_state in states_list:
+            print "motor %d" % m_state.id
+            if m_state.id == self.gripper_id:
+                self.gripper_load = m_state.load
+                print "gripper load %f" % m_state.id
+
+    def grasp_bottle(self, joint_angles):
+        '''
+        Move arm to bottle's coordinate then grasp the bottle.
+
+        Check the 'load' from the gripper motor to determine if bottle has been grasped.
+
+        RETURN:
+            True - if bottle has been grasped
+            False - if bottle has NOT been grasped
+
+        '''
         # Always have the elbow_flex joint bent upward because we need the gripper to come
         # down around the bottle. This is because if the gripper is pointed forward and we
         # move side-to-side outside of the gripper with hit the bottle.
@@ -160,8 +207,17 @@ class InverseKin:
         # Move gripper back down to grasp the bottle
         self.set_joint_angles(self.prev_angles)
 
-        # Tell nav to go back
-        self.pub.publish(std_msgs.msg.Bool(True))
+        # Close the gripper
+        self.prev_angles[-1] = self.gripper_grasp
+        self.set_joint_angles(self.prev_angles)
+
+        # Check 'load' of the gripper motor
+        if self.gripper_load > 0:
+            print "GRASPED: %f" % self.gripper_load
+            return True
+        else:
+            print "NOT GRASPED: %f" % self.gripper_load
+            return False
 
     def jacobian_mat_gen(self, joint_theta):
 
