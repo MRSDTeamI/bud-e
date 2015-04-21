@@ -71,6 +71,10 @@ class InverseKin:
         self.des_q_r = None
         self.des_q_i = None
 
+        # Saved previous joint angles so we can use it later when we want the elbow to
+        # move back down so the gripper can grasp the bottle
+        self.prev_angles = None
+
         # FK solver
         self.fk = fk.ForwardKin()
         # Joint controller class to help us move the arm
@@ -130,10 +134,25 @@ class InverseKin:
         self.des_q_i = pose_mat[0, 3:6]  # desired imaginary parts of quaternion
         self.motor1_angle = np.arctan2(pose_mat[0,1],  pose_mat[0,0])
 
+        # Move elbow/gripper up first before we start moving to new location.
+        # This is because if the new position is relatively close, we may start moving
+        # sideways and not lift the elbow/gripper up in time.
+        if self.prev_angles != None:
+            self.prev_angles[2] = -1.7
+            self.set_joint_angles(self.prev_angles)
+
         # Get list of joint angles
         joint_angles = self.solve_ik()
 
+        # Always have the elbow_flex joint bent upward because we need the gripper to come
+        # down around the bottle. This is because if the gripper is pointed forward and we
+        # move side-to-side outside of the gripper with hit the bottle.
+        self.prev_angles = list(joint_angles)   # to get a copy
+        joint_angles[2] = -1.7
         self.set_joint_angles(joint_angles)
+
+        # Move gripper back down to grasp the bottle
+        self.set_joint_angles(self.prev_angles)
 
     def jacobian_mat_gen(self, joint_theta):
 
@@ -316,7 +335,6 @@ class InverseKin:
     def set_joint_angles(self, angles):
         '''
         Set joint angles of the arm through dynamixel helper class.
-        
     
         '''
         if isinstance(angles, np.ndarray):
@@ -331,7 +349,6 @@ class InverseKin:
 
         # The 2nd and 3rd joint values are flipped
         angles = [angles[0], -1*angles[1], -1*angles[2], angles[3]]
-        print angles
 
         self.jctrl.move_joint(angles)
 

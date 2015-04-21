@@ -39,20 +39,20 @@ class Joint:
 
     def move_home(self):
         '''
-        Move to HOME joint angles of [0, -1.4, 1.5, 0]
+        Move to HOME joint angles of [0, -1.4, 1.7, 0]
         Move in pieces so we don't accidentally bump into restricted areas (corners of
         the base the arm is mounted to.
 
-        Final configuration should be [0, -1.4, 1.5, 0] where the arm rests in front like an
+        Final configuration should be [0, -1.4, 1.7, 0] where the arm rests in front like an
         elephant trunk (with the end-effector pointing forward).
 
         '''
         # Move elbow_flex up to level first
-        self.move_joint([self.pan_angle, -0.5, 0, 0])
+        self.move_joint([self.pan_angle, -0.5, 1.7, 0])
         # Move should_pan to 0
-        self.move_joint([0, -0.5, 0, 0])
+        self.move_joint([0, -0.5, 1.7, 0])
         # Move elbow down to default position
-        self.move_joint([0, -1.4, 1.5, 0])
+        self.move_joint([0, -1.4, 1.7, 0])
         
 
 def main():
