@@ -42,13 +42,14 @@ from numpy.linalg import inv
 import sys
 import rospy
 import geometry_msgs.msg
+import std_msgs.msg
 
 import ForwardKin as fk
 import jw_joint_ctrl as joint_ctrl
 
 
 # Use debug values instead of listening to ROS topic
-debug = 0
+debug = 1
 # Use DLS method instead of screw theory.
 # This may prevent singular matrix error.
 use_dls = 1
@@ -77,12 +78,15 @@ class InverseKin:
 
         # FK solver
         self.fk = fk.ForwardKin()
-        # Joint controller class to help us move the arm
-        self.jctrl = joint_ctrl.Joint()
 
         # Only listen to topic for bottle coordinate if we're not debugging
         if not debug:
+            # Joint controller class to help us move the arm
+            self.jctrl = joint_ctrl.Joint()
+            # To get bottle's center coordinate
             rospy.Subscriber("bottle_center", geometry_msgs.msg.Vector3, self.callback)
+            # To tell navigation we're done 
+            self.pub = rospy.Publisher('bude_goback', std_msgs.msg.Bool)
 
         if type(f_pose) is list:
             #print len(f_pose)
@@ -102,7 +106,7 @@ class InverseKin:
             self.motor1_angle = np.arctan2(pose_mat[0,1], pose_mat[0,0])
 
         # Set initial values
-        self.theta = [0.0, 0.0, 0.0]  # initial joint angles
+        self.theta = [0.0, 0.0, 0.0, 0.0]  # initial joint angles
 
         ## These values can be tweaked to for IK performance
         self.num_iter = 1000  # 1000 loops to find the inverse kinematics
@@ -153,6 +157,9 @@ class InverseKin:
 
         # Move gripper back down to grasp the bottle
         self.set_joint_angles(self.prev_angles)
+
+        # Tell nav to go back
+        self.pub.publish(std_msgs.msg.Bool(True))
 
     def jacobian_mat_gen(self, joint_theta):
 
