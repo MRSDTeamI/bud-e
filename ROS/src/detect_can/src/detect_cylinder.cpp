@@ -1,3 +1,39 @@
+/*******************************************************************
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2015, Johnny Wang
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of SRI International nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Author: Johnny Wang
+*******************************************************************/
+
 #include <ros/ros.h>
 // PCL specific includes
 #include <sensor_msgs/PointCloud2.h>
@@ -87,9 +123,9 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	// RUN PASS THROUGH FILTER TO REMOVE POINTS OUTSIDE OF DESIRED VIEW
 	pass.setInputCloud(cloud);
 	pass.setFilterFieldName("z");
-	pass.setFilterLimits(0,1.2);  // filter out points greater than 1.5m
+	pass.setFilterLimits(0,1.5);  // filter out points greater than 1.5m
 	pass.setFilterFieldName("x");
-	pass.setFilterLimits(0,1);
+	pass.setFilterLimits(-0.5,0.5);
 	//pass.setFilterFieldName("y");
 	//pass.setFilterLimits(0,8);
 	//pass.setFilterLimitsNegative(true);
@@ -134,7 +170,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	int i = 0, count = 0, nr_points = (int) inPCseg->points.size();
 	// Keep segmenting planes until 10% of points are left
 	//while (inPCseg->points.size() > 0.06 * nr_points) {  // 0.06
-	while (inPCseg->points.size() > 0.1 * nr_points) {  // 0.08
+	while (inPCseg->points.size() > 0.3 * nr_points) {  // 0.08
 
 		seg_plane.setInputCloud (inPCseg);
 		//seg.setInputNormals (cloud_normals);
@@ -207,7 +243,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	ec.setInputCloud (outPCseg);
 	ec.extract (cluster_indices);
 
-	//std::cerr << "Cluster size: " << cluster_indices.size() << std::endl;
+	std::cerr << "Cluster size: " << cluster_indices.size() << std::endl;
 	if (cluster_indices.size() > 0) {
 		/*
 		 * To separate each cluster out of the vector<PointIndices> we have to iterate through
@@ -251,41 +287,41 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 			extract.setIndices (inliers_cylinder);
 			extract.setNegative (false);
 			extract.filter (*cloud_cylinder);
-		// Pass to "test_cloud" topic to debug
-		// Convert to ROS
-		pcl::toPCLPointCloud2(*cloud_cylinder, *object);  // PointXYZ to PointCloud2
-	   	//pcl::toPCLPointCloud2(*outPCseg, *object);  // PointXYZ to PointCloud2
-    	pcl_conversions::fromPCL(*object, output); // PointCloud2 to sensor-msgs
-    	output.header.frame_id = input->header.frame_id;
-    	pub_temp.publish(output);
-			ROS_INFO("cloud_cylinder POINTS: %lu\n",cloud_cylinder->points.size());
-			ROS_INFO("cloud_cluster POINTS: %lu\n",cloud_cluster->points.size());
-			double seg_frac = (double)cloud_cylinder->points.size()/(double)cloud_cluster->points.size();
-			ROS_INFO("Fraction: %f\n",seg_frac);
+            // Pass to "test_cloud" topic to debug
+            // Convert to ROS
+            pcl::toPCLPointCloud2(*cloud_cylinder, *object);  // PointXYZ to PointCloud2
+            //pcl::toPCLPointCloud2(*outPCseg, *object);  // PointXYZ to PointCloud2
+            pcl_conversions::fromPCL(*object, output); // PointCloud2 to sensor-msgs
+            output.header.frame_id = input->header.frame_id;
+            pub_temp.publish(output);
+            ROS_INFO("cloud_cylinder POINTS: %lu\n",cloud_cylinder->points.size());
+            ROS_INFO("cloud_cluster POINTS: %lu\n",cloud_cluster->points.size());
+            double seg_frac = (double)cloud_cylinder->points.size()/(double)cloud_cluster->points.size();
+            ROS_INFO("Fraction: %f\n",seg_frac);
 
-			float point_threshold = 0.5;
-			if (cloud_cylinder->points.size () <= point_threshold * cloud_cluster->points.size()) {
-				std::cerr << "NOT CYLINDER" << std::endl;
-				g_not_cylinder++;
-				g_not_cyl_frac += seg_frac;
-			} else {
-				std::cerr << "CYLINDER" << std::endl;
-				*clustered_cloud += *cloud_cylinder;
-				g_cylinder++;
-				g_cyl_frac += seg_frac;
-
-				// Output centroid coordinate
-				Eigen::Vector4f centroid;
-				//pcl::compute3DCentroid(*outPCseg, cluster_indices[0], centroid);
-				pcl::compute3DCentroid(*cloud_cylinder, centroid);
-				std::cerr << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
-				geometry_msgs::Vector3 can_coord;
-				can_coord.x = centroid[0];
-				can_coord.y = centroid[1];
-				can_coord.z = centroid[2];
-				pub_coord.publish(can_coord);
-
-			}
+            float point_threshold = 0.5;
+            if (cloud_cylinder->points.size () <= point_threshold * cloud_cluster->points.size()) {
+                std::cerr << "NOT CYLINDER" << std::endl;
+                g_not_cylinder++;
+                g_not_cyl_frac += seg_frac;
+            } else {
+                std::cerr << "CYLINDER" << std::endl;
+                *clustered_cloud += *cloud_cylinder;
+                g_cylinder++;
+                g_cyl_frac += seg_frac;
+    
+                // Output centroid coordinate
+                Eigen::Vector4f centroid;
+                //pcl::compute3DCentroid(*outPCseg, cluster_indices[0], centroid);
+                pcl::compute3DCentroid(*cloud_cylinder, centroid);
+                std::cerr << centroid[0] << " " << centroid[1] << " " << centroid[2] << std::endl;
+                geometry_msgs::Vector3 can_coord;
+                can_coord.x = centroid[0];
+                can_coord.y = centroid[1];
+                can_coord.z = centroid[2];
+                pub_coord.publish(can_coord);
+    
+            }
 			double now_time = ros::Time::now().toSec() - g_start_time;
 			ROS_INFO("Time: %f\n", now_time);
 
