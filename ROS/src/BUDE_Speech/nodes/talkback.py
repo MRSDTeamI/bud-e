@@ -20,8 +20,9 @@ from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from subprocess import call
 
-
-
+# Create publishers	       
+pubScissor = rospy.Publisher('target_height',UInt16, queue_size=rospy)
+pubKinect=rospy.Publisher('start_vision',Bool,queue_size=rospy)
 
 class TalkBack:
     def __init__(self):
@@ -41,11 +42,14 @@ class TalkBack:
         rospy.sleep(1)
         self.soundhandle.say("Ready", self.voice)
         
-        rospy.loginfo("Say one of the navigation commands...")
+        rospy.loginfo("BUD-E is ready to roll")
 
         # Subscribe to the recognizer output
         rospy.Subscriber('/recognizer/output', String, self.talkback)
-       
+	
+	# Subscribe to the topic where the grasping system will report success/failure 
+	rospy.Subscriber('bude_goback',Bool,self.goBackOnGraspSuccess)
+        rospy.loginfo("Subscribed to bude_goback")
 	# POP Movebase
 	locations = dict()
         
@@ -67,31 +71,43 @@ class TalkBack:
         #state = self.move_base.get_state()
         #rospy.loginfo("\n\nTEMP Goal STATE= %s \n\n",state)
 
+    def goBackOnGraspSuccess(self,msg):
+	rospy.loginfo("Received %s",msg)
+	if msg:
+            rospy.loginfo("Going back on grasp success")
+            self.soundhandle.say("I think I have grabbed the bottle. I am going back to give it to grandma",self.voice)
+	    rospy.sleep(3)
+            self.goal.target_pose.pose.position.x=-16.9
+            self.goal.target_pose.pose.position.y=3.74
+            self.goal.target_pose.pose.position.z=0.0019
+            self.goal.target_pose.pose.orientation.w=1.0
+            self.goal.target_pose.header.frame_id = 'map'
+            self.goal.target_pose.header.stamp = rospy.Time.now()
+            self.move_base.send_goal(self.goal)
+        else:
+	    rospy.loginfo("Grasp is not reported to be a success yet. Waiting.")
+
     def goBack(self):
         rospy.loginfo("Going back")
         self.soundhandle.say("I am going back.",self.voice)
 	rospy.sleep(3)
-        self.goal.target_pose.pose.position.x=-3.06
-        self.goal.target_pose.pose.position.y=0.09
-        self.goal.target_pose.pose.position.z=0.0
+        self.goal.target_pose.pose.position.x=-16.9
+        self.goal.target_pose.pose.position.y=3.74
+        self.goal.target_pose.pose.position.z=0.0019
         self.goal.target_pose.pose.orientation.w=1.0
         self.goal.target_pose.header.frame_id = 'map'
         self.goal.target_pose.header.stamp = rospy.Time.now()
         self.move_base.send_goal(self.goal)
 
     def cmdScissorLift(self):
-        pub = rospy.Publisher('target_height',UInt16, queue_size=rospy)
-	pubKinect=rospy.Publisher('start_visiion',Bool,queue_size=rospy)
-        #10.init_node('cmdScissorLift', anonymous=True)
-        rate = rospy.Rate(10) # 10hz
-        #while not rospy.is_shutdown():
+        
         heightCmd = 15
         rospy.loginfo("Sending %d to the target_height topic",heightCmd)
-        pub.publish(heightCmd)
+        pubScissor.publish(heightCmd)
 	pubKinect.publish(Bool(True))
-        rospy.sleep(30.0)
+	rospy.sleep(30.0)
         self.goBack()
-        #rate.sleep()
+            
 
     def getGoalStatus(self,goalMessage):
 	 # Subscribe to the move_base client goal status
@@ -112,6 +128,7 @@ class TalkBack:
 	
         command=msg.data
 	# The following line should be moved below.
+	
 	rospy.Subscriber('move_base/status', GoalStatusArray,self.getGoalStatus)
       #POPstart
 
@@ -141,9 +158,9 @@ class TalkBack:
 	    # Set up the goal location
             self.goal = MoveBaseGoal()
            #self.goal.target_pose.pose = locations['kitchen']
-	    self.goal.target_pose.pose.position.x=0.378
-	    self.goal.target_pose.pose.position.y=-0.11
-	    self.goal.target_pose.pose.position.z=0.0
+	    self.goal.target_pose.pose.position.x=0.443
+	    self.goal.target_pose.pose.position.y=-0.271
+	    self.goal.target_pose.pose.position.z=0.004
 	    self.goal.target_pose.pose.orientation.w=1.0
 	    self.goal.target_pose.header.frame_id = 'map'
             self.goal.target_pose.header.stamp = rospy.Time.now()
