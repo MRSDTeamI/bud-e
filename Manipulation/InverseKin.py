@@ -345,10 +345,13 @@ class InverseKin:
         #   shoulder_pan_joint, shoulder_pitch_joint, elbow_flex_joint, wrist_roll_joint
         # We can generally leave wrist to be 0
         if len(angles) == 3:
-            angles.extend([0.0])
+            angles.extend([0.0, -1.6])
+        if len(angles) == 4:
+            angles.extend([-1.6])
 
         # The 2nd and 3rd joint values are flipped
-        angles = [angles[0], -1*angles[1], -1*angles[2], angles[3]]
+        angles[1] = -1*angles[1] 
+        angles[2] = -1*angles[2]
 
         self.jctrl.move_joint(angles)
 

@@ -3,7 +3,7 @@
 
 
     <!-- Load controller configuration to parameter server -->
-    <rosparam file="$(find my_dynamixel_tutorial)/src/main_control.yaml" command="load"/>
+    <rosparam file="$(find BUD-E_arm_moveit)/config/main_control.yaml" command="load"/>
 
     <node name="dynamixel_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
           args="--manager=dxl_manager
@@ -13,7 +13,7 @@
       				shoulder_pitch_joint
       				elbow_flex_joint
       				wrist_roll_joint
-
+                    gripper_joint
 				"
           output="screen"/>
 </launch>

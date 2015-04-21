@@ -26,7 +26,7 @@ JointTrajectoryActionController for the joints.
     <!-- 
     	Load joint configuration to parameter server 
     -->
-    <rosparam file="$(find my_dynamixel_tutorial)/src/joints.yaml" command="load"/>
+    <rosparam file="$(find BUD-E_arm_moveit)/config/joints.yaml" command="load"/>
     
 
 	<!-- 
@@ -39,6 +39,7 @@ JointTrajectoryActionController for the joints.
       				shoulder_pan_joint
       				shoulder_pitch_joint
       				elbow_flex_joint
-      				wrist_roll_joint"
+      				wrist_roll_joint
+                    gripper_joint"
           output="screen"/>
 </launch>
