@@ -39,20 +39,19 @@ class Joint:
 
     def move_home(self):
         '''
-        Move to HOME joint angles of [0, -1.4, 1.7, 0]
-        Move in pieces so we don't accidentally bump into restricted areas (corners of
-        the base the arm is mounted to.
-
-        Final configuration should be [0, -1.4, 1.7, 0] where the arm rests in front like an
-        elephant trunk (with the end-effector pointing forward).
+        Move to HOME joint angles of [-1.4, -1.4, 1.7, 0]. This is the starboard side of
+        the robot. We need to start the arm on this side because it allows us to be closer
+        to the table/bottle.
+        Move in parts so we don't accidentally bump into restricted areas (corners
+        of the base the arm is mounted to.
 
         '''
         # Move elbow_flex up to level first
         self.move_joint([self.pan_angle, -0.5, 1.7, 0, -1])
-        # Move should_pan to 0
-        self.move_joint([0, -0.5, 1.7, 0, -1])
+        # Move should_pan to the side
+        self.move_joint([-1.4, -0.5, 1.7, 0, -1])
         # Move elbow down to default position
-        self.move_joint([0, -1.4, 1.7, 0, -1])
+        self.move_joint([-1.4, -1.4, 1.7, 0, -1])
         
 
 def main():
