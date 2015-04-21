@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- launch freenect -->
+    <include file="$(find freenect_launch)/launch/freenect.launch"/>
+<!--
+    <include file="$(find openni_launch)/launch/openni.launch"/>
+-->
+
+    <node name="detect_cylinder" pkg="detect_can" type="detect_cylinder"/>
+    <node name="parse_center" pkg="detect_can" type="parse_center"/>
+
+</launch>
