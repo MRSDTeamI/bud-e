@@ -65,7 +65,8 @@ class Joint:
 
         # If arm is at home, move it up first to move out of the way of the base
         if self.at_home:
-            self.move_joint([self.pan_angle, -0.5, 1.7, 0, -1])
+            # [shoulder pan, shoulder_pitch, elbow, wrist, gripper]
+            self.move_joint([self.pan_angle, -0.5, 1.7, 0, -1.7])  # open gripper to widest
 
         goal = FollowJointTrajectoryGoal()
         goal.trajectory.joint_names = ['shoulder_pan_joint', 'shoulder_pitch_joint','elbow_flex_joint','wrist_roll_joint','gripper_joint']
@@ -89,12 +90,16 @@ class Joint:
         of the base the arm is mounted to.
 
         '''
+        elbow_flexed = 1.7      # flexed (90 deg)
+        shoulder_pan = -1.5     # pan arm to rightside of robot
+        shoulder_pitch = -0.5   # arm flared out
+        gripper_neutral = -1
         # Move elbow_flex up to level first
-        self.move_joint([self.pan_angle, -0.5, 1.7, 0, -1])
+        self.move_joint([self.pan_angle, shoulder_pitch, elbow, 0, gripper_neutral])
         # Move should_pan to the side
-        self.move_joint([-1.5, -0.5, 1.7, 0, -1])
+        self.move_joint([shoulder_pan, shoulder_pitch, elbow, 0, gripper_neutral])
         # Move elbow down to default position
-        self.move_joint([-1.5, -1.3, 1.7, 0, -1])
+        self.move_joint([shoulder_pan, -1.3, elbow, 0, gripper_neutral])
        
         self.at_home = True 
 
