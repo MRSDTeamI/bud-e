@@ -2,7 +2,7 @@
 
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2013, Johnny Wang
+# Copyright (c) 2015, Johnny Wang
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,9 @@
 #
 # Author: Johnny Wang
 
+###########################
 # Given final position and orientation, find the joint angles
+###########################
 
 import numpy as np
 from scipy.linalg import expm
@@ -49,7 +51,7 @@ import jw_joint_ctrl as joint_ctrl
 
 
 # Use debug values instead of listening to ROS topic
-debug = 1
+debug = 0
 # Use DLS method instead of screw theory.
 # This may prevent singular matrix error.
 use_dls = 1
