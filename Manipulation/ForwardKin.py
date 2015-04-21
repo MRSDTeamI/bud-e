@@ -15,7 +15,7 @@ class ForwardKin:
 
     '''
     def __init__(self, j_vals=None):
-        self.NUM_JOINTS = 3
+        self.NUM_JOINTS = 4
 
         if type(j_vals) is list:
             #print len(j_vals)
@@ -56,41 +56,41 @@ class ForwardKin:
             self.j1 = np.array([[0, 0, 1]]).transpose()
             self.j2 = np.array([[-1, 0, 0]]).transpose()
             self.j3 = np.array([[0, 0, 1]]).transpose()
-            #self.j4 = np.array([[-1, 0, 0]]).transpose()
+            self.j4 = np.array([[-1, 0, 0]]).transpose()
         else:
             # Crustcrawler values
             self.j1 = np.array([[0, 0, 1]]).transpose()
             self.j2 = np.array([[0, 1, 0]]).transpose()
             self.j3 = np.array([[0, 1, 0]]).transpose()
-            #self.j4 = np.array([[1, 0, 0]]).transpose()
+            self.j4 = np.array([[1, 0, 0]]).transpose()
         
         # Test values
         if debug:
             self.q1 = np.array([[0.61, 0.72, 0]]).transpose()
             self.q2 = np.array([[0, 0.72, 1.346]]).transpose()
             self.q3 = np.array([[0.61, 0.72, 0]]).transpose()
-            #self.q4 = np.array([[0, 0.765, 1.896]]).transpose()
+            self.q4 = np.array([[0, 0.765, 1.896]]).transpose()
         else:
             # Crustcrawler values
             self.q1 = np.array([[0, 0, 0.03]]).transpose()
             self.q2 = np.array([[0.07, 0, 0.115]]).transpose()
             self.q3 = np.array([[0.24, 0, 0.115]]).transpose()
-            #self.q4 = np.array([[0.3, 0, 0.13]]).transpose()
+            self.q4 = np.array([[0.35, 0, 0.13]]).transpose()
 
         self.t1 = np.cross(-self.j1, self.q1, axis=0)
         self.t2 = np.cross(-self.j2, self.q2, axis=0)
         self.t3 = np.cross(-self.j3, self.q3, axis=0)
-        #self.t4 = np.cross(-self.j4, self.q4, axis=0)
+        self.t4 = np.cross(-self.j4, self.q4, axis=0)
         
         self.c1 = np.concatenate((self.t1, self.j1))
         self.c2 = np.concatenate((self.t2, self.j2))
         self.c3 = np.concatenate((self.t3, self.j3))
-        #self.c4 = np.concatenate((self.t4, self.j4))
+        self.c4 = np.concatenate((self.t4, self.j4))
         
-        #self.j = np.concatenate((self.j1, self.j2, self.j3, self.j4), axis=1)
-        #self.c = np.concatenate((self.c1, self.c2, self.c3, self.c4), axis=1)
-        self.j = np.concatenate((self.j1, self.j2, self.j3), axis=1)
-        self.c = np.concatenate((self.c1, self.c2, self.c3), axis=1)
+        self.j = np.concatenate((self.j1, self.j2, self.j3, self.j4), axis=1)
+        self.c = np.concatenate((self.c1, self.c2, self.c3, self.c4), axis=1)
+        #self.j = np.concatenate((self.j1, self.j2, self.j3), axis=1)
+        #self.c = np.concatenate((self.c1, self.c2, self.c3), axis=1)
         
     def set_joints(self, j_vals):
         '''
