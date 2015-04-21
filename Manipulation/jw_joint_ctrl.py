@@ -27,7 +27,7 @@ class Joint:
 
     def move_joint(self, angles):
         goal = FollowJointTrajectoryGoal()                      
-        goal.trajectory.joint_names = ['shoulder_pan_joint', 'shoulder_pitch_joint','elbow_flex_joint','wrist_roll_joint']
+        goal.trajectory.joint_names = ['shoulder_pan_joint', 'shoulder_pitch_joint','elbow_flex_joint','wrist_roll_joint','gripper_joint']
         point = JointTrajectoryPoint()
         point.positions = angles
         point.time_from_start = rospy.Duration(3)                       
@@ -48,16 +48,16 @@ class Joint:
 
         '''
         # Move elbow_flex up to level first
-        self.move_joint([self.pan_angle, -0.5, 1.7, 0])
+        self.move_joint([self.pan_angle, -0.5, 1.7, 0, -1])
         # Move should_pan to 0
-        self.move_joint([0, -0.5, 1.7, 0])
+        self.move_joint([0, -0.5, 1.7, 0, -1])
         # Move elbow down to default position
-        self.move_joint([0, -1.4, 1.7, 0])
+        self.move_joint([0, -1.4, 1.7, 0, -1])
         
 
 def main():
         arm = Joint()
-        arm.move_joint([-1.0,1.9,0.0,0])
+        arm.move_joint([-1.0,1.9,0.0,0,-1])
         #arm.move_joint([0.5,1.5,1.0])
         #arm.move_joint([6.28,3.14,6.28])
 
