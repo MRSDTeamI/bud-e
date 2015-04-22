@@ -69,7 +69,7 @@ class InverseKin:
     '''
     def __init__(self, f_pose=None):
         self.NUM_POSE = 7    # 3 position 4 orientation
-        self.NUM_RETRIES = 2 # number of arm grasp retries 
+        self.NUM_RETRIES = 5 # number of arm grasp retries 
         self.num_try = 0     # arm grasp try count
 
         # Need these values to solve for IK. Decalre them here so we can error check
@@ -173,14 +173,22 @@ class InverseKin:
         # Move arm to bottle and grasp it
         grasp_success = self.grasp_bottle(joint_angles)
 
+        print "num_try: %d" % self.num_try
+        print "num_retry: %d" % self.NUM_RETRIES
+
         ## NOTE: if not success, retry? Do this by reseting parse_center???
         if not grasp_success:
-            print "FAILED to grasp: reseting parse_center"
-            self.pub_parse.publish(std_msgs.msg.Bool(True))
-            self.pub_parse.publish(std_msgs.msg.Bool(True))
-            self.pub_parse.publish(std_msgs.msg.Bool(False))
-            self.jctrl.move_home()   # move arm to home position
-        elif grasp_success or self.num_try >= self.NUM_RETRIES:
+            if self.num_try >= self.NUM_RETRIES:
+                self.pub.publish(std_msgs.msg.Bool(True))
+                return
+            else: 
+                print "FAILED to grasp: reseting parse_center"
+                self.pub_parse.publish(std_msgs.msg.Bool(True))
+                self.pub_parse.publish(std_msgs.msg.Bool(True))
+                self.pub_parse.publish(std_msgs.msg.Bool(False))
+                self.jctrl.move_home()   # move arm to home position
+        else:
+            print "SUCCESS"
             ## Move arm to basket and drop bottle
             self.bottle_to_basket(joint_angles)
             # Tell nav to go back
