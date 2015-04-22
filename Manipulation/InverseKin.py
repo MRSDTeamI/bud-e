@@ -69,7 +69,7 @@ class InverseKin:
     '''
     def __init__(self, f_pose=None):
         self.NUM_POSE = 7    # 3 position 4 orientation
-        self.NUM_RETRIES = 1 # number of arm grasp retries 
+        self.NUM_RETRIES = 2 # number of arm grasp retries 
         self.num_try = 0     # arm grasp try count
 
         # Need these values to solve for IK. Decalre them here so we can error check
@@ -176,9 +176,10 @@ class InverseKin:
         ## NOTE: if not success, retry? Do this by reseting parse_center???
         if not grasp_success:
             print "FAILED to grasp: reseting parse_center"
-            self.pub.publish(std_msgs.msg.Bool(True))
-            self.pub.publish(std_msgs.msg.Bool(True))
-            self.pub.publish(std_msgs.msg.Bool(False))
+            self.pub_parse.publish(std_msgs.msg.Bool(True))
+            self.pub_parse.publish(std_msgs.msg.Bool(True))
+            self.pub_parse.publish(std_msgs.msg.Bool(False))
+            self.jctrl.move_home()   # move arm to home position
         elif grasp_success or self.num_try >= self.NUM_RETRIES:
             ## Move arm to basket and drop bottle
             self.bottle_to_basket(joint_angles)
