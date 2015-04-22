@@ -85,6 +85,7 @@ class InverseKin:
         # FK solver
         self.fk = fk.ForwardKin()
 
+
         # Only listen to topic for bottle coordinate if we're not debugging
         if not debug:
             # Joint controller class to help us move the arm
