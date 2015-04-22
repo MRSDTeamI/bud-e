@@ -90,7 +90,7 @@ class Joint:
         of the base the arm is mounted to.
 
         '''
-        elbow_flexed = 1.7      # flexed (90 deg)
+        elbow = 1.7             # flexed (90 deg)
         shoulder_pan = -1.5     # pan arm to rightside of robot
         shoulder_pitch = -0.5   # arm flared out
         gripper_neutral = -1
@@ -99,7 +99,7 @@ class Joint:
         # Move should_pan to the side
         self.move_joint([shoulder_pan, shoulder_pitch, elbow, 0, gripper_neutral])
         # Move elbow down to default position
-        self.move_joint([shoulder_pan, -1.3, elbow, 0, gripper_neutral])
+        self.move_joint([shoulder_pan, -1, elbow, 0, gripper_neutral])
        
         self.at_home = True 
 
