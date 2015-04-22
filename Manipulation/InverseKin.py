@@ -69,7 +69,7 @@ class InverseKin:
     '''
     def __init__(self, f_pose=None):
         self.NUM_POSE = 7    # 3 position 4 orientation
-        self.NUM_RETRIES = 3 # number of arm grasp retries 
+        self.NUM_RETRIES = 1 # number of arm grasp retries 
         self.num_try = 0     # arm grasp try count
 
         # Need these values to solve for IK. Decalre them here so we can error check
@@ -96,7 +96,8 @@ class InverseKin:
             self.gripper_id = 7
             self.gripper_load = 0.0
             self.gripper_grasp = -0.5
-            self.gripper_release = -1.5 self.default_load = 7
+            self.gripper_release = -1.5 
+            self.default_load = 7
             rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
             # To tell navigation we're done 
             self.pub = rospy.Publisher('bude_goback', std_msgs.msg.Bool)
@@ -168,26 +169,23 @@ class InverseKin:
         # Get list of joint angles
         joint_angles = self.solve_ik()
 
-        while self.num_try < self.NUM_RETRIES:
-            self.num_try = self.num_try + 1
-            # Move arm to bottle and grasp it
-            grasp_success = self.grasp_bottle(joint_angles)
+        self.num_try = self.num_try + 1
+        # Move arm to bottle and grasp it
+        grasp_success = self.grasp_bottle(joint_angles)
 
-            ## NOTE: if not success, retry? Do this by reseting parse_center???
-            if not grasp_success:
-                print "FAILED to grasp: reseting parse_center"
-                self.pub.publish(std_msgs.msg.Bool(True))
-                self.pub.publish(std_msgs.msg.Bool(True))
-                self.pub.publish(std_msgs.msg.Bool(False))
-            else:
-                ## Move arm to basket and drop bottle
-                self.bottle_to_basket(joint_angles)
-                break
+        ## NOTE: if not success, retry? Do this by reseting parse_center???
+        if not grasp_success:
+            print "FAILED to grasp: reseting parse_center"
+            self.pub.publish(std_msgs.msg.Bool(True))
+            self.pub.publish(std_msgs.msg.Bool(True))
+            self.pub.publish(std_msgs.msg.Bool(False))
+        elif grasp_success or self.num_try >= self.NUM_RETRIES:
+            ## Move arm to basket and drop bottle
+            self.bottle_to_basket(joint_angles)
+            # Tell nav to go back
+            self.pub.publish(std_msgs.msg.Bool(True))
 
-        # Tell nav to go back
-        self.pub.publish(std_msgs.msg.Bool(True))
-
-    def bottle_to_basket(self, joint_angles):
+    def bottle_to_basket(self, angles):
         if isinstance(angles, np.ndarray):
             angles = angles.tolist()
 
@@ -200,7 +198,7 @@ class InverseKin:
         if len(angles) == 4:
             angles.extend([-1.6])
 
-        new = True
+        new = False
         if new:
             joint_angles[1] = 1.6
             joint_angles[4] = self.gripper_grasp
