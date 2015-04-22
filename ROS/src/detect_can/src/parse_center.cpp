@@ -72,25 +72,25 @@ std::cerr << "----------------" << std::endl;
 				//arm_output.y = y * 100;
 				//arm_output.z = z * 100;
 				
-				double kinect_depth = 0.30; // Kinect is ~30cm behind the arm.
-				double kinect_height = 0.2; // Kinect is ~20cm above the arm.
+				double kinect_depth = 0.30; // Kinect is behind the arm.
+				double kinect_height = 0.22; // Kinect is above the arm.
 				double bottle_ht = 0.088;   // approx. bottle center height (above gnd plane)
-                double kinect_x_coeff = 0.14; // For some reason, it keeps reporting objects 15cm off.
+                double kinect_x_coeff = -0.04; // For some reason, it keeps reporting objects a little bit offset.
 				
 				arm_output.x = z - kinect_depth;
 				arm_output.y = x - kinect_x_coeff;
-				arm_output.z = -1*(y - kinect_height + bottle_ht);
+				arm_output.z = -1*(y - kinect_height);
 				pub_bot.publish(arm_output);
 
 				// for scissor lift
 				// range of height for PR 9 should be 0-20cm
 				// cap on these values only for this PR
-				if (y < 0)  
-					y = 0;
-				if (y > 0.1)
-					y = 0.1;
+				if (arm_output.z < 0)  
+					arm_output.z = 0;
+				if (arm_output.z > 0.1)
+					arm_output.z = 0.1;
 				std_msgs::UInt16 sl_output;
-				sl_output.data = y*100;
+				sl_output.data = arm_output.z*100;
 				pub_sl.publish(sl_output);
 
 				count = 0;
