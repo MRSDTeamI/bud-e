@@ -93,6 +93,7 @@ class InverseKin:
             self.gripper_load = 0.0
             self.gripper_grasp = -0.5
             self.gripper_release = -1.5
+            self.default_load = 7
             rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
             # To tell navigation we're done 
             self.pub = rospy.Publisher('bude_goback', std_msgs.msg.Bool)
@@ -180,11 +181,11 @@ class InverseKin:
         we can tell if the bottle has been grasped.
 
         '''
-        for m_state in states_list:
-            print "motor %d" % m_state.id
+        for m_state in states_list.motor_states:
+            #print "motor %d" % m_state.id
             if m_state.id == self.gripper_id:
                 self.gripper_load = m_state.load
-                print "gripper load %f" % m_state.id
+                #print "gripper load %f" % m_state.id
 
     def grasp_bottle(self, joint_angles):
         '''
@@ -212,7 +213,7 @@ class InverseKin:
         self.set_joint_angles(self.prev_angles)
 
         # Check 'load' of the gripper motor
-        if self.gripper_load > 0:
+        if self.gripper_load > self.default_load:
             print "GRASPED: %f" % self.gripper_load
             return True
         else:
