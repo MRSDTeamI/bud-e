@@ -50,6 +50,7 @@ from dynamixel_msgs.msg import MotorState, MotorStateList
 import ForwardKin as fk
 import jw_joint_ctrl as joint_ctrl
 
+import time
 
 # Use debug values instead of listening to ROS topic
 debug = 0
@@ -169,9 +170,12 @@ class InverseKin:
         if not grasp_success:
             print "FAILED to grasp: retry somehow"
         else:
-            # Move arm to basket and drop bottle
-            self.set_joint_angles([0, 1.7, 1.7, 0, self.gripper_grasp])
-            self.set_joint_angles([0, 1.7, 1.7, 0, self.gripper_release])
+            ## Move arm to basket and drop bottle
+            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
+            time.sleep(1)
+            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
+            time.sleep(1)
+            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
             # Tell nav to go back
             self.pub.publish(std_msgs.msg.Bool(True))
 
@@ -210,10 +214,11 @@ class InverseKin:
 
         # Close the gripper
         self.prev_angles[-1] = self.gripper_grasp
-        self.set_joint_angles(self.prev_angles)
+        self.set_joint_angles(self.prev_angles, invert=False)
 
         # Check 'load' of the gripper motor
-        if self.gripper_load > self.default_load:
+        #if self.gripper_load < self.default_load:
+        if self.gripper_load < 0:
             print "GRASPED: %f" % self.gripper_load
             return True
         else:
@@ -398,7 +403,7 @@ class InverseKin:
         print self.theta
         return self.theta
 
-    def set_joint_angles(self, angles):
+    def set_joint_angles(self, angles, invert=True):
         '''
         Set joint angles of the arm through dynamixel helper class.
     
@@ -415,9 +420,10 @@ class InverseKin:
         if len(angles) == 4:
             angles.extend([-1.6])
 
-        # The 2nd and 3rd joint values are flipped
-        angles[1] = -1*angles[1] 
-        angles[2] = -1*angles[2]
+        if invert:
+            # The 2nd and 3rd joint values are flipped
+            angles[1] = -1*angles[1] 
+            angles[2] = -1*angles[2]
 
         self.jctrl.move_joint(angles)
 

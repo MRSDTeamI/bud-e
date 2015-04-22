@@ -63,11 +63,11 @@ class Joint:
 
     def move_joint(self, angles):
 
-        # If arm is at home, move it up first to move out of the way of the base
-        if self.at_home:
-            # [shoulder pan, shoulder_pitch, elbow, wrist, gripper]
-            self.move_joint([self.pan_angle, -0.5, 1.7, 0, -1.7])  # open gripper to widest
-            self.at_home = False   # arm is no longer at home position
+        ## If arm is at home, move it up first to move out of the way of the base
+        #if self.at_home:
+        #    # [shoulder pan, shoulder_pitch, elbow, wrist, gripper]
+        #    self.move_joint([self.pan_angle, -0.5, 1.7, 0, -1.7])  # open gripper to widest
+        #    self.at_home = False   # arm is no longer at home position
 
         goal = FollowJointTrajectoryGoal()
         goal.trajectory.joint_names = ['shoulder_pan_joint', 'shoulder_pitch_joint','elbow_flex_joint','wrist_roll_joint','gripper_joint']
