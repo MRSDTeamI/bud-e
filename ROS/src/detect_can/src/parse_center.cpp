@@ -84,9 +84,9 @@ std::cerr << "----------------" << std::endl;
 				double bottle_ht = 0.088;   // approx. bottle center height (above gnd plane)
                 double kinect_x_coeff = 0; // For some reason, it keeps reporting objects a little bit offset.
 				
-				arm_output.x = z - kinect_depth;
-				arm_output.y = -1*(x - kinect_x_coeff) + 0.11;
-				arm_output.z = -1*(y - kinect_height) + 0.08;
+				arm_output.x = z - kinect_depth -0.02;
+				arm_output.y = -1*(x - kinect_x_coeff) + 0.1;
+				arm_output.z = -1*(y - kinect_height) + 0.06;
 				pub_bot.publish(arm_output);
 
 				// for scissor lift
