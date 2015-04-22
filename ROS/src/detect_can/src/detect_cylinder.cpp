@@ -364,7 +364,7 @@ int
 main (int argc, char** argv)
 {
 	// Initialize ROS
-	ros::init (argc, argv, "detect_can");
+	ros::init (argc, argv, "detect_cylinder");
 	ros::NodeHandle nh;
 
 	g_start_time = ros::Time::now().toSec();
