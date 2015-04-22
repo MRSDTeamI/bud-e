@@ -99,6 +99,9 @@ class InverseKin:
             rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
             # To tell navigation we're done 
             self.pub = rospy.Publisher('bude_goback', std_msgs.msg.Bool)
+            # To tell parse_center to reset and look for bottle coordinate again
+            # for arm retry
+            self.pub_parse = rospy.Publisher('reset_parse', std_msgs.msg.Bool)
 
         if type(f_pose) is list:
             #print len(f_pose)
@@ -171,7 +174,10 @@ class InverseKin:
 
             ## NOTE: if not success, retry? Do this by reseting parse_center???
             if not grasp_success:
-                print "FAILED to grasp: retry somehow"
+                print "FAILED to grasp: reseting parse_center"
+                self.pub.publish(std_msgs.msg.Bool(True))
+                self.pub.publish(std_msgs.msg.Bool(True))
+                self.pub.publish(std_msgs.msg.Bool(False))
             else:
                 ## Move arm to basket and drop bottle
                 self.bottle_to_basket(joint_angles)

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <std_msgs/UInt16.h>
+#include <std_msgs/Bool.h>
 
 float x;
 float y;
@@ -23,6 +24,12 @@ coord_state current_state = INIT;
 
 ros::Publisher pub_bot;
 ros::Publisher pub_sl;
+
+void reset_state(const std_msgs::Bool input)
+{
+    if (input.data)
+        current_state = INIT;
+}
 
 void parse_center(const geometry_msgs::Vector3 input)
 {
@@ -126,6 +133,7 @@ main (int argc, char** argv)
 	ros::NodeHandle nh;
  
 	ros::Subscriber sub = nh.subscribe ("cluster_center", 100, parse_center);
+    ros::Subscriber reset = nh.subscribe ("reset_parse", 1, reset_state);
 
 	// bottle coordinates for arm
 	pub_bot = nh.advertise<geometry_msgs::Vector3>("bottle_center",100);
