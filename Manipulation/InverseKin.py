@@ -95,8 +95,7 @@ class InverseKin:
             self.gripper_id = 7
             self.gripper_load = 0.0
             self.gripper_grasp = -0.5
-            self.gripper_release = -1.5
-            self.default_load = 7
+            self.gripper_release = -1.5 self.default_load = 7
             rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
             # To tell navigation we're done 
             self.pub = rospy.Publisher('bude_goback', std_msgs.msg.Bool)
@@ -165,33 +164,49 @@ class InverseKin:
         # Get list of joint angles
         joint_angles = self.solve_ik()
 
-        # Move arm to bottle and grasp it
-        grasp_success = self.grasp_bottle(joint_angles)
-        self.num_try = self.num_try + 1
-
         while self.num_try < self.NUM_RETRIES:
+            self.num_try = self.num_try + 1
+            # Move arm to bottle and grasp it
+            grasp_success = self.grasp_bottle(joint_angles)
+
             ## NOTE: if not success, retry? Do this by reseting parse_center???
             if not grasp_success:
                 print "FAILED to grasp: retry somehow"
             else:
                 ## Move arm to basket and drop bottle
-                new = True
-                if new:
-                    joint_angles[1] = 1.6
-                    joint_angles[4] = self.gripper_grasp
-                    self.set_joint_angles(joint_angles,invert=False)
-                    time.sleep(3)
-                    joint_angles[4] = self.gripper_release
-                    self.set_joint_angles(joint_angles,invert=False)
-                else:
-                    self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
-                    time.sleep(1)
-                    self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
-                    time.sleep(1)
-                    self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
+                self.bottle_to_basket(joint_angles)
+                break
 
-            # Tell nav to go back
-            self.pub.publish(std_msgs.msg.Bool(True))
+        # Tell nav to go back
+        self.pub.publish(std_msgs.msg.Bool(True))
+
+    def bottle_to_basket(self, joint_angles):
+        if isinstance(angles, np.ndarray):
+            angles = angles.tolist()
+
+        # If using only 3 DoF solver of IK, we will only get 3 joint angles.
+        # The jw_joint_ctrl class expects 4 joint angles for:
+        #   shoulder_pan_joint, shoulder_pitch_joint, elbow_flex_joint, wrist_roll_joint
+        # We can generally leave wrist to be 0
+        if len(angles) == 3:
+            angles.extend([0.0, -1.6])
+        if len(angles) == 4:
+            angles.extend([-1.6])
+
+        new = True
+        if new:
+            joint_angles[1] = 1.6
+            joint_angles[4] = self.gripper_grasp
+            self.set_joint_angles(joint_angles,invert=False)
+            time.sleep(3)
+            joint_angles[4] = self.gripper_release
+            self.set_joint_angles(joint_angles,invert=False)
+        else:
+            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
+            time.sleep(1)
+            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
+            time.sleep(1)
+            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
 
     def motor_states_callback(self, states_list):
         '''
