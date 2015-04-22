@@ -55,7 +55,7 @@ std::cerr << "----------------" << std::endl;
 				Convert coordinates to arm coordinates.
 				Kinect coordinates (Kinect frame):
 					x to the left
-					y going up
+					y going down
 					z going forward
 				Arm coordinates (Arm frame):
 					x going forward
@@ -79,7 +79,7 @@ std::cerr << "----------------" << std::endl;
 				
 				arm_output.x = z - kinect_depth;
 				arm_output.y = x - kinect_x_coeff;
-				arm_output.z = y - kinect_height + bottle_ht;
+				arm_output.z = -1*(y - kinect_height + bottle_ht);
 				pub_bot.publish(arm_output);
 
 				// for scissor lift
@@ -87,8 +87,8 @@ std::cerr << "----------------" << std::endl;
 				// cap on these values only for this PR
 				if (y < 0)  
 					y = 0;
-				if (y > 0.2)
-					y = 0.2;
+				if (y > 0.1)
+					y = 0.1;
 				std_msgs::UInt16 sl_output;
 				sl_output.data = y*100;
 				pub_sl.publish(sl_output);
