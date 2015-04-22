@@ -68,7 +68,9 @@ class InverseKin:
 
     '''
     def __init__(self, f_pose=None):
-        self.NUM_POSE = 7  # 3 position 4 orientation
+        self.NUM_POSE = 7    # 3 position 4 orientation
+        self.NUM_RETRIES = 3 # number of arm grasp retries 
+        self.num_try = 0     # arm grasp try count
 
         # Need these values to solve for IK. Decalre them here so we can error check
         # at the start of solve_ik.
@@ -165,17 +167,29 @@ class InverseKin:
 
         # Move arm to bottle and grasp it
         grasp_success = self.grasp_bottle(joint_angles)
+        self.num_try = self.num_try + 1
 
-        ## NOTE: if not success, retry? Do this by reseting parse_center???
-        if not grasp_success:
-            print "FAILED to grasp: retry somehow"
-        else:
-            ## Move arm to basket and drop bottle
-            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
-            time.sleep(1)
-            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
-            time.sleep(1)
-            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
+        while self.num_try < self.NUM_RETRIES:
+            ## NOTE: if not success, retry? Do this by reseting parse_center???
+            if not grasp_success:
+                print "FAILED to grasp: retry somehow"
+            else:
+                ## Move arm to basket and drop bottle
+                new = True
+                if new:
+                    joint_angles[1] = 1.6
+                    joint_angles[4] = self.gripper_grasp
+                    self.set_joint_angles(joint_angles,invert=False)
+                    time.sleep(3)
+                    joint_angles[4] = self.gripper_release
+                    self.set_joint_angles(joint_angles,invert=False)
+                else:
+                    self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
+                    time.sleep(1)
+                    self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
+                    time.sleep(1)
+                    self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
+
             # Tell nav to go back
             self.pub.publish(std_msgs.msg.Bool(True))
 
@@ -215,6 +229,8 @@ class InverseKin:
         # Close the gripper
         self.prev_angles[-1] = self.gripper_grasp
         self.set_joint_angles(self.prev_angles, invert=False)
+
+        time.sleep(5)
 
         # Check 'load' of the gripper motor
         #if self.gripper_load < self.default_load:
