@@ -40,3 +40,42 @@ In another terminal, manually input the desired end position:
 
 $ rostopic pub bottle_center geometry_msgs/Vector3 -- 0.1 0 0.35
 
+---------------------------------------------------------------------------------------
+
+RUN VISION AND MANIPULATION SYSTEM TOGETHER (also scissor lift if desired)
+
+roslaunch openni_launch openni.launch
+
+# if using the scissor lift (optional)
+rosrun rosserial_python serial_node.py _port:=/dev/ttyACM1
+
+rosrun detect_can detect_cylinder
+
+roslaunch BUD-E_arm_moveit base.launch
+
+roslaunch BUD-E_arm_moveit meta.launch
+
+# arm should move to initialization pose
+InverseKin.py
+
+# To parse output from detect_cylinder and write filtered coordinate to bottle_center topic
+rosrun detect_can parse_center
+
+# To tell detect_cylinder to start running
+rostopic pub /start_vision std_msgs/Bool True
+
+ 
+DEBUG
+# look at “detect_can_cloud” for the final output
+# “plane_seg” is the cloud after plane segmentation
+rosrun rviz rviz
+
+# bottle’s center coordinate for the arm
+rostopic echo bottle_center
+
+# height to go to for the scissor lift
+rostopic echo target_height
+
+# flag to tell navigation to finish/go back
+rostopic echo bude_goback
+
