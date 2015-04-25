@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-    talkback.py - 
+    talkback 
 """
 
 import roslib; roslib.load_manifest('BUDE_Speech')
@@ -23,11 +23,15 @@ from subprocess import call
 # Create publishers	       
 pubScissor = rospy.Publisher('target_height',UInt16, queue_size=rospy)
 pubKinect=rospy.Publisher('start_vision',Bool,queue_size=rospy)
-
+goingToKitchen=1
+goingBack=0
+flag1=3# flag { reaching kitchen}to inform user only once about the status
+flag2=3# flag {going back}
 class TalkBack:
     def __init__(self):
         rospy.on_shutdown(self.cleanup)
-          
+        
+	 
         self.voice = rospy.get_param("~voice", "voice_us1_mbrola")
         self.wavepath = rospy.get_param("~wavepath", "")
         
@@ -73,54 +77,82 @@ class TalkBack:
 
     def goBackOnGraspSuccess(self,msg):
 	rospy.loginfo("Received %s",msg)
+	global goingToKitchen
+	global goingBack
 	if msg:
             rospy.loginfo("Going back on grasp success")
             self.soundhandle.say("I think I have grabbed the bottle. I am going back to give it to grandma",self.voice)
-	    rospy.sleep(3)
-            self.goal.target_pose.pose.position.x=-16.9
-            self.goal.target_pose.pose.position.y=3.74
-            self.goal.target_pose.pose.position.z=0.0019
-            self.goal.target_pose.pose.orientation.w=1.0
+	    rospy.sleep(10)
+	    pubKinect.publish(Bool(False))
+            self.goal.target_pose.pose.position.x=-12.8
+            self.goal.target_pose.pose.position.y=0.00635
+            self.goal.target_pose.pose.position.z=0.000
+            self.goal.target_pose.pose.orientation.w=-1.0
             self.goal.target_pose.header.frame_id = 'map'
             self.goal.target_pose.header.stamp = rospy.Time.now()
+	    #After going back, inform the user
+	    goingToKitchen=0
+            goingBack=1
             self.move_base.send_goal(self.goal)
         else:
 	    rospy.loginfo("Grasp is not reported to be a success yet. Waiting.")
 
     def goBack(self):
+	
         rospy.loginfo("Going back")
         self.soundhandle.say("I am going back.",self.voice)
 	rospy.sleep(3)
-        self.goal.target_pose.pose.position.x=-16.9
-        self.goal.target_pose.pose.position.y=3.74
+        self.goal.target_pose.pose.position.x=-2.76
+        self.goal.target_pose.pose.position.y=-0.441
         self.goal.target_pose.pose.position.z=0.0019
         self.goal.target_pose.pose.orientation.w=1.0
         self.goal.target_pose.header.frame_id = 'map'
         self.goal.target_pose.header.stamp = rospy.Time.now()
-        self.move_base.send_goal(self.goal)
+	self.move_base.send_goal(self.goal)
+	
+	
 
     def cmdScissorLift(self):
         
-        heightCmd = 15
+        heightCmd = 5
         rospy.loginfo("Sending %d to the target_height topic",heightCmd)
         pubScissor.publish(heightCmd)
 	pubKinect.publish(Bool(True))
-	rospy.sleep(30.0)
-        self.goBack()
+	#rospy.sleep(30.0)
+        #self.goBack()
             
 
     def getGoalStatus(self,goalMessage):
 	 # Subscribe to the move_base client goal status
-        rospy.loginfo("getGoalStatus called")
-        rospy.loginfo(rospy.get_caller_id() + "Received %s", goalMessage)
+        #rospy.loginfo("getGoalStatus called")
+        #rospy.loginfo(rospy.get_caller_id() + "Received %s", goalMessage)
+	global goingToKitchen
+        global goingBack
+        global flag1
+        global flag2
         if goalMessage.status_list:
             curr_status = goalMessage.status_list[0].status
             #rospy.loginfo("Current Goal Status: %s",curr_status) 
 	    if curr_status==3:
-	        rospy.loginfo("BUD-E has reached the Goal")
-	        self.soundhandle.say("I have reached my goal. Please congratulate me. Thanks you.",self.voice)
-		rospy.sleep(3.0)
-	        self.cmdScissorLift()
+		rospy.loginfo("goingToKitchen:%d",goingToKitchen)
+		if goingToKitchen:
+	            rospy.loginfo("BUD-E has reached the Kitchen")
+		    #self.soundhandle.say("I have reached the Kitchen. I am going to fetch water.",self.voice)
+		    #rospy.sleep(6)
+	     	    self.soundhandle.say("I have reached the Kitchen. I am going to fetch water.",self.voice)
+		    rospy.sleep(8)
+		    rospy.loginfo("Commanding scissor lift to go high")
+		    self.cmdScissorLift()
+		    goingToKitchen=0
+	        if goingBack:
+                    goingBack=goingBack+1        
+		    
+	   	if  goingBack>100:
+	            rospy.loginfo("BUD-E has come back")
+		    self.soundhandle.say("I have reached my goal! Please congratulate me. Thank you.",self.voice)
+		    rospy.sleep(10)
+
+		    #self.cmdScissorLift()
 
         
     def talkback(self, msg):
@@ -158,9 +190,9 @@ class TalkBack:
 	    # Set up the goal location
             self.goal = MoveBaseGoal()
            #self.goal.target_pose.pose = locations['kitchen']
-	    self.goal.target_pose.pose.position.x=0.443
-	    self.goal.target_pose.pose.position.y=-0.271
-	    self.goal.target_pose.pose.position.z=0.004
+	    self.goal.target_pose.pose.position.x=-0.0155
+	    self.goal.target_pose.pose.position.y=-0.0062
+	    self.goal.target_pose.pose.position.z=-0.00167
 	    self.goal.target_pose.pose.orientation.w=1.0
 	    self.goal.target_pose.header.frame_id = 'map'
             self.goal.target_pose.header.stamp = rospy.Time.now()
@@ -220,6 +252,7 @@ class TalkBack:
 
 if __name__=="__main__":
     rospy.init_node('talkback')
+   
     try:
         TalkBack()
         rospy.spin()
