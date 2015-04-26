@@ -44,7 +44,7 @@ from numpy.linalg import inv
 import sys
 import rospy
 import geometry_msgs.msg
-import std_msgs.msg
+from std_msgs.msg import Bool
 from dynamixel_msgs.msg import MotorState, MotorStateList
 
 import ForwardKin as fk
@@ -85,6 +85,8 @@ class InverseKin:
         # FK solver
         self.fk = fk.ForwardKin()
 
+        # Flag whether vision module has started
+        self.started_vision = False
 
         # Only listen to topic for bottle coordinate if we're not debugging
         if not debug:
@@ -99,11 +101,13 @@ class InverseKin:
             self.gripper_release = -1.5 
             self.default_load = 7
             rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
+            # To get whether we started vision (so know which arm move_home to use)
+            rospy.Subscriber("start_vision", Bool, self.vision_callback)
             # To tell navigation we're done 
-            self.pub = rospy.Publisher('bude_goback', std_msgs.msg.Bool)
+            self.pub = rospy.Publisher('bude_goback', Bool)
             # To tell parse_center to reset and look for bottle coordinate again
             # for arm retry
-            self.pub_parse = rospy.Publisher('reset_parse', std_msgs.msg.Bool)
+            self.pub_parse = rospy.Publisher('reset_parse', Bool)
 
         if type(f_pose) is list:
             #print len(f_pose)
@@ -173,26 +177,28 @@ class InverseKin:
         # Move arm to bottle and grasp it
         grasp_success = self.grasp_bottle(joint_angles)
 
-        print "num_try: %d" % self.num_try
-        print "num_retry: %d" % self.NUM_RETRIES
+        print "try: %d  retry: %d" % (self.num_try, self.NUM_RETRIES)
 
-        ## NOTE: if not success, retry? Do this by reseting parse_center???
         if not grasp_success:
+            # Just (tell nav to) return if we failed too many times
             if self.num_try >= self.NUM_RETRIES:
-                self.pub.publish(std_msgs.msg.Bool(True))
+                self.jctrl.move_home(False)     # move to home position of 'nav'
+                self.pub.publish(Bool(True))
                 return
+            # Reset parse_center and try to grasp again with new coordinates
             else: 
                 print "FAILED to grasp: reseting parse_center"
-                self.pub_parse.publish(std_msgs.msg.Bool(True))
-                self.pub_parse.publish(std_msgs.msg.Bool(True))
-                self.pub_parse.publish(std_msgs.msg.Bool(False))
-                self.jctrl.move_home()   # move arm to home position
+                self.pub_parse.publish(Bool(True))
+                self.pub_parse.publish(Bool(True))
+                self.pub_parse.publish(Bool(False))
+                self.jctrl.move_home(self.started_vision)   # move arm to home position
         else:
             print "SUCCESS"
             ## Move arm to basket and drop bottle
             self.bottle_to_basket(joint_angles)
+            self.jctrl.move_home(False)     # move to home position of 'nav'
             # Tell nav to go back
-            self.pub.publish(std_msgs.msg.Bool(True))
+            self.pub.publish(Bool(True))
 
     def bottle_to_basket(self, angles):
         if isinstance(angles, np.ndarray):
@@ -233,6 +239,14 @@ class InverseKin:
             if m_state.id == self.gripper_id:
                 self.gripper_load = m_state.load
                 #print "gripper load %f" % m_state.id
+
+    def vision_callback(self, data):
+        # Don't do anything if flag hasn't changed
+        if self.started_vision == data.data:
+            pass
+        else:
+            self.started_vision = data.data
+            self.jctrl.move_home(self.started_vision)   # move arm to home position
 
     def grasp_bottle(self, joint_angles):
         '''
