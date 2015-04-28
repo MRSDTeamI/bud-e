@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-    talkback 
+  BUD-E ops
+  @Author Praveen Palanisamy
 """
 
 import roslib; roslib.load_manifest('BUDE_Speech')
@@ -233,20 +234,8 @@ class TalkBack:
 	  #  call(["rostopic"] ["pub"] ["/move_base_simple/goal"] ["geometry_msgs/PoseStamped"] ["'{header: {stamp: now, frame_id: \"map\"}, pose: {position: {x: 1.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}'"]
 	# TO-DO:
 	# Write routines to take care of the case when the goal is aborted.l
-
-     # POPend
-          
-        # Speak the recognized words in the selected voice
-        #self.soundhandle.say(msg.data, self.voice)
-        
-        # Uncomment to play one of the built-in sounds
-        #rospy.sleep(2)
-        #self.soundhandle.play(5)
-        
-        # Uncomment to play a wave file
-        #rospy.sleep(2)
-        #self.soundhandle.playWave(self.wavepath + "/R2D2a.wav")
-
+	
+     
     def cleanup(self):
         rospy.loginfo("Shutting down talkback node...")
 
