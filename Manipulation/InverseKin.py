@@ -69,7 +69,7 @@ class InverseKin:
     '''
     def __init__(self, f_pose=None):
         self.NUM_POSE = 7    # 3 position 4 orientation
-        self.NUM_RETRIES = 5 # number of arm grasp retries 
+        self.NUM_RETRIES = 3 # number of arm grasp retries 
         self.num_try = 0     # arm grasp try count
 
         # Need these values to solve for IK. Decalre them here so we can error check
@@ -108,9 +108,10 @@ class InverseKin:
             # To tell parse_center to reset and look for bottle coordinate again
             # for arm retry
             self.pub_parse = rospy.Publisher('reset_parse', Bool)
+            # To tell the vision module to start again
+            self.pub_vision = rospy.Publisher('start_vision', Bool)
 
         if type(f_pose) is list:
-            #print len(f_pose)
             if len(f_pose) == self.NUM_POSE:
                 self.final_pose = f_pose
             else:
@@ -174,24 +175,30 @@ class InverseKin:
         joint_angles = self.solve_ik()
 
         self.num_try = self.num_try + 1
-        # Move arm to bottle and grasp it
-        grasp_success = self.grasp_bottle(joint_angles)
-
         print "try: %d  retry: %d" % (self.num_try, self.NUM_RETRIES)
 
+        # Tell nav to return if we failed too many times
+        if self.num_try > self.NUM_RETRIES:
+            print "MAX retry reached, returning"
+            self.jctrl.move_home(False)     # move to home position of 'nav'
+            self.pub.publish(Bool(True))
+            return
+        else:
+            # Move arm to bottle and grasp it
+            grasp_success = self.grasp_bottle(joint_angles)
+
         if not grasp_success:
-            # Just (tell nav to) return if we failed too many times
-            if self.num_try >= self.NUM_RETRIES:
-                self.jctrl.move_home(False)     # move to home position of 'nav'
-                self.pub.publish(Bool(True))
-                return
             # Reset parse_center and try to grasp again with new coordinates
-            else: 
-                print "FAILED to grasp: reseting parse_center"
-                self.pub_parse.publish(Bool(True))
-                self.pub_parse.publish(Bool(True))
-                self.pub_parse.publish(Bool(False))
-                self.jctrl.move_home(self.started_vision)   # move arm to home position
+            print "FAILED to grasp: reseting parse_center"
+            #self.pub_parse.publish(Bool(True))
+            #self.pub_parse.publish(Bool(True))
+            #self.pub_parse.publish(Bool(False))
+            #self.jctrl.move_home(self.started_vision)   # move arm to retry position
+                
+            # Reset arm to position then start vision again
+            # Writing true should initiate vision_callback as well
+            #self.jctrl.move_home(True)  # move arm to retry position
+            self.pub_vision.publish(Bool(True))
         else:
             print "SUCCESS"
             ## Move arm to basket and drop bottle
@@ -235,18 +242,25 @@ class InverseKin:
 
         '''
         for m_state in states_list.motor_states:
-            #print "motor %d" % m_state.id
             if m_state.id == self.gripper_id:
                 self.gripper_load = m_state.load
-                #print "gripper load %f" % m_state.id
 
     def vision_callback(self, data):
-        # Don't do anything if flag hasn't changed
-        if self.started_vision == data.data:
+        # When we first start the node and 'start_vision' is false, we should have the arm
+        # in front for navigation purposes
+        if data.data == False and self.started_vision == False:
+            self.jctrl.move_home(False)         # move arm to the front
+        elif data.data == False and self.started_vision == True:
             pass
+        # Once we set 'start_vision' to true, we mark started_vision as true and also move
+        # the arm to the side to start grasping
+        #elif data.data == True and self.started_vision == False:
         else:
-            self.started_vision = data.data
-            self.jctrl.move_home(self.started_vision)   # move arm to home position
+            self.started_vision = True
+            self.pub_parse.publish(Bool(False)) # Pause parser b/c it was probably parsing
+                                                # while the arm was still moving away
+            self.jctrl.move_home(True)          # move arm to the side
+            self.pub_parse.publish(Bool(True)) # tell parser to start again
 
     def grasp_bottle(self, joint_angles):
         '''
@@ -432,29 +446,17 @@ class InverseKin:
             # 6x6 matrix
             sq_mat = np.dot(tmp_jacobian, tmp_jacobian.transpose())
             if use_dls:
-                #print sq_mat
                 sq_mat = np.add(sq_mat, np.dot(self.dls_lambda**2, np.eye(6)))
 
             inv_jac = inv(sq_mat)
-            #print np.allclose(np.dot(sq_mat, inv_jac), np.eye(6))
-            #print "inv"
-            #print inv_jac
-            #print "dot"
-            #print sq_mat
 
             # Calc d_theta
             # 4x6 matrix
             tmp1 = np.dot(tmp_jacobian.transpose(), inv_jac)
             d_theta = np.dot(tmp1, e_matrix)
-            #print "d_theta"
-            #print e_matrix
-            #print d_theta
 
             # Calc theta
             tmp1 = np.multiply(d_theta, self.time_step)
-            #print "theta"
-            #print self.theta
-            #print tmp1
             self.theta = self.theta + tmp1.getA1()
             # i+1 so we don't divide by 0
             self.theta[0] = self.motor1_angle / (i+1) * self.num_iter

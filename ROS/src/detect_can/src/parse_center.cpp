@@ -21,18 +21,28 @@ enum coord_state {
 	MONITOR
 };
 coord_state current_state = INIT;
+bool pause_parser = false;
 
 ros::Publisher pub_bot;
 ros::Publisher pub_sl;
+ros::Publisher pub_vision;
 
 void reset_state(const std_msgs::Bool input)
 {
-    if (input.data)
-        current_state = INIT;
+    current_state = INIT;
+    count = 0;
+    if (input.data) {
+        pause_parser = false;
+    } else {
+        pause_parser = true;
+    }
 }
 
 void parse_center(const geometry_msgs::Vector3 input)
 {
+    if (pause_parser)
+        return;
+
 std::cerr << current_state << " | " << input.x << " " << input.y << " " << input.z << std::endl;
 
 	switch(current_state) {
@@ -86,12 +96,13 @@ std::cerr << "----------------" << std::endl;
 				
 				arm_output.x = z - kinect_depth - 0.02;
 				arm_output.y = -1*(x - kinect_x_coeff) + 0.09;
-				arm_output.z = -1*(y - kinect_height) + 0.07;
+				arm_output.z = -1*(y - kinect_height) + 0.08;
 				pub_bot.publish(arm_output);
 
 				// for scissor lift
 				// range of height for PR 9 should be 0-20cm
 				// cap on these values only for this PR
+                arm_output.z = arm_output.z - bottle_ht;
 				if (arm_output.z < 0)  
 					arm_output.z = 0;
 				if (arm_output.z > 0.1)
@@ -101,7 +112,13 @@ std::cerr << "----------------" << std::endl;
 				pub_sl.publish(sl_output);
 
 				count = 0;
-				current_state = MONITOR;
+				//current_state = MONITOR;
+
+                // tell vision to stop, arm needs to turn it back on once it is done.
+                std_msgs::Bool run_vision;
+                run_vision.data = false;
+                pub_vision.publish(run_vision);
+				current_state = INIT;
 			}
 		break;
 		// Monitor the stream of coordinates and if it deviates too much from
@@ -141,6 +158,11 @@ main (int argc, char** argv)
 
 	// height (0-20cm) for scissor lift
 	pub_sl = nh.advertise<std_msgs::UInt16>("target_height",100);
+
+    // To pause the vision module once we've given the bottle coordinate.
+    // This is so the arm can try to grasp without vision falsely picking
+    // up random objects.
+    pub_vision = nh.advertise<std_msgs::Bool>("start_vision", 10);
 //
 //	// Sets up the random number generator
 //	srand(time(0));
