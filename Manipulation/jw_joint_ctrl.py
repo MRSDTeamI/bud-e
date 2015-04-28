@@ -40,6 +40,7 @@ import roslib
 import rospy
 import actionlib
 from std_msgs.msg import Float64
+from std_msgs.msg import Bool
 import trajectory_msgs.msg 
 import control_msgs.msg  
 from trajectory_msgs.msg import JointTrajectoryPoint
@@ -54,7 +55,8 @@ class Joint:
         self.jta.wait_for_server()
         rospy.loginfo('Found joint trajectory action!')
 
-        rospy.Subscriber("shoulder_pan_joint/state", JointState, self.callback)
+        rospy.Subscriber("shoulder_pan_joint/state", JointState, self.shoulder_pan_callback)
+        rospy.Subscriber("shoulder_pitch_joint/state", JointState, self.shoulder_pitch_callback)
        
         rospy.sleep(1)  # so we have some time to get pan_angle from the callback
 
@@ -77,28 +79,53 @@ class Joint:
         goal.trajectory.points.append(point)
         self.jta.send_goal_and_wait(goal)
 
-    def callback(self, data):
+    def shoulder_pan_callback(self, data):
         self.pan_angle = data.current_pos
 
-    def move_home(self):
+    def shoulder_pitch_callback(self, data):
+        self.pitch_angle = data.current_pos
+
+    def move_home(self, vision=False):
         '''
-        Move to HOME joint angles of [-1.4, -1.4, 1.7, 0]. This is the starboard side of
-        the robot. We need to start the arm on this side because it allows us to be closer
-        to the table/bottle.
-        Move in parts so we don't accidentally bump into restricted areas (corners
-        of the base the arm is mounted to.
+        Move the arm to a 'home' position.
+        If vision module == True: 'home' is the down and to the right (starboard side of 
+        the robot). This allows us to (1) be closer to the table/bottle, and (2) not block 
+        the Kinect.
+        If vision module == False: 'home' is upright and infront of the robot. This
+        allows us to (1) keep the arm from bumping into objects while navigating, and (2)
+        not have the scissor lift list to one side.
 
         '''
-        elbow = 1.7             # flexed (90 deg)
-        shoulder_pan = -1.5     # pan arm to rightside of robot
-        shoulder_pitch = -0.5   # arm flared out
         gripper_neutral = -1
-        # Move elbow_flex up to level first
-        self.move_joint([self.pan_angle, shoulder_pitch, elbow, 0, gripper_neutral])
-        # Move should_pan to the side
-        self.move_joint([shoulder_pan, shoulder_pitch, elbow, 0, gripper_neutral])
-        # Move elbow down to default position
-        self.move_joint([shoulder_pan, -1, elbow, 0, gripper_neutral])
+
+        # Vision module started, 'home' is to the side.
+        if vision == True:
+            shoulder_pan = -1.5     # pan arm to rightside of robot
+            shoulder_pitch = 0   # arm flared out
+            elbow = 1.7             # flexed (90 deg)
+
+            # Lift arm up at elbow 
+            self.move_joint([self.pan_angle, self.pitch_angle, elbow, 0, gripper_neutral]) 
+            # Rotate to right side
+            self.move_joint([shoulder_pan, self.pitch_angle, elbow, 0, gripper_neutral])
+            # Put arm down on right side
+            self.move_joint([shoulder_pan, shoulder_pitch, elbow, 0, gripper_neutral])
+            
+            ## Move elbow up to level first
+            #self.move_joint([self.pan_angle, shoulder_pitch, elbow, 0, gripper_neutral])
+            ## Move should_pan to the side
+            #self.move_joint([shoulder_pan, shoulder_pitch, elbow, 0, gripper_neutral])
+            ## Move elbow down to default position
+            #self.move_joint([shoulder_pan, -1, elbow, 0, gripper_neutral])
+        # Vision module not started, 'home' is in front
+        else:
+            shoulder_pan = 0        # pan arm to front of robot
+            shoulder_pitch = 1.7    # arm upright
+            elbow = -1.7            # flexed (90 deg)
+            # Move elbow up above base first
+            self.move_joint([self.pan_angle, shoulder_pitch, elbow, 0, gripper_neutral])
+            # Move should_pan so arm is facing the front
+            self.move_joint([shoulder_pan, shoulder_pitch, elbow, 0, gripper_neutral])
        
         self.at_home = True 
 
