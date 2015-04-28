@@ -2,7 +2,7 @@
 #include <geometry_msgs/Vector3.h>
 #include <stdlib.h>
 #include <math.h>
-#include <std_msgs/UInt16.h>
+#include <std_msgs/Int32.h>
 #include <std_msgs/Bool.h>
 
 float x;
@@ -107,7 +107,7 @@ std::cerr << "----------------" << std::endl;
 					arm_output.z = 0;
 				if (arm_output.z > 0.1)
 					arm_output.z = 0.1;
-				std_msgs::UInt16 sl_output;
+				std_msgs::Int32 sl_output;
 				sl_output.data = arm_output.z*100;
 				pub_sl.publish(sl_output);
 
@@ -157,7 +157,7 @@ main (int argc, char** argv)
 	pub_bot = nh.advertise<geometry_msgs::Vector3>("bottle_center",100);
 
 	// height (0-20cm) for scissor lift
-	pub_sl = nh.advertise<std_msgs::UInt16>("target_height",100);
+	pub_sl = nh.advertise<std_msgs::Int32>("target_height",100);
 
     // To pause the vision module once we've given the bottle coordinate.
     // This is so the arm can try to grasp without vision falsely picking
