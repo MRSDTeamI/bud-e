@@ -125,7 +125,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	pass.setFilterFieldName("z");
 	pass.setFilterLimits(0,1.5);  // filter out points greater than 1.5m
 	pass.setFilterFieldName("x");
-	pass.setFilterLimits(-0.5,0.5);
+	pass.setFilterLimits(-0.4,0.4);
 	//pass.setFilterFieldName("y");
 	//pass.setFilterLimits(0,8);
 	//pass.setFilterLimitsNegative(true);
@@ -170,7 +170,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 	int i = 0, count = 0, nr_points = (int) inPCseg->points.size();
 	// Keep segmenting planes until 10% of points are left
 	//while (inPCseg->points.size() > 0.06 * nr_points) {  // 0.06
-	while (inPCseg->points.size() > 0.3 * nr_points) {  // 0.08
+	while (inPCseg->points.size() > 0.35 * nr_points) {  // 0.08
 
 		seg_plane.setInputCloud (inPCseg);
 		//seg.setInputNormals (cloud_normals);

@@ -97,7 +97,7 @@ class InverseKin:
             # To get the load of the gripper servo
             self.gripper_id = 7
             self.gripper_load = 0.0
-            self.gripper_grasp = -0.5
+            self.gripper_grasp = -0.5     # -1.1 if fingers flipped other way
             self.gripper_release = -1.5 
             self.default_load = 7
             rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
@@ -184,8 +184,15 @@ class InverseKin:
             self.pub.publish(Bool(True))
             return
         else:
+            # Check if any joint positions are out of range
+            bad_joints = [x for x in joint_angles if x < -1.7 or x > 1.7]
+            if bad_joints:
+                print "Joint angle contains bad value (<-1.7 or >1.7)!"
+                print joint_angles
+                grasp_success = False
             # Move arm to bottle and grasp it
-            grasp_success = self.grasp_bottle(joint_angles)
+            else:
+                grasp_success = self.grasp_bottle(joint_angles)
 
         if not grasp_success:
             # Reset parse_center and try to grasp again with new coordinates
