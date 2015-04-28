@@ -14,9 +14,14 @@ rosrun rosserial_python serial_node.py /dev/ttyACM1
 
 5.rosrun rosaria RosAria
 
-6. roslaunch freenect_launch freenect.launch
+6. roslaunch freenect_launch freenect.launch (OR the Openni launch depending on what is installed)
 7. rosrun detect_can detect_cylinder
 8. rosrun detect_can parse_center
+
+[Manipulator]
+roslaunch bude_arm base.launch
+roslaunch bude_arm meta.launch
+rosrun bude_arm InverseKin.py
 
 BUD-E should say "Ready"
 
