@@ -103,6 +103,8 @@ class InverseKin:
             rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
             # To get whether we started vision (so know which arm move_home to use)
             rospy.Subscriber("start_vision", Bool, self.vision_callback)
+            # To reset
+            rospy.Subscriber("reset_arm", Bool, self.reset_arm_callback)
             # To tell navigation we're done 
             self.pub = rospy.Publisher('bude_goback', Bool)
             # To tell parse_center to reset and look for bottle coordinate again
@@ -268,6 +270,10 @@ class InverseKin:
                                                 # while the arm was still moving away
             self.jctrl.move_home(True)          # move arm to the side
             self.pub_parse.publish(Bool(True)) # tell parser to start again
+
+    def reset_arm_callback(self, data):
+        self.started_vision = False
+        self.num_try = 0
 
     def grasp_bottle(self, joint_angles):
         '''
