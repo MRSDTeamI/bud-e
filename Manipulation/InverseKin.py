@@ -273,8 +273,9 @@ class InverseKin:
             self.pub_parse.publish(Bool(True)) # tell parser to start again
 
     def reset_arm_callback(self, data):
-        self.started_vision = False
-        self.num_try = 0
+        if data.data == True
+            self.started_vision = False
+            self.num_try = 0
 
     def grasp_bottle(self, joint_angles):
         '''
