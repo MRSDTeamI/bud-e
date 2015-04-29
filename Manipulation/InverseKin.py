@@ -253,7 +253,8 @@ class InverseKin:
             self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
             time.sleep(1)
             self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
-            time.sleep(1) self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
+            time.sleep(1) 
+            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
 
     def motor_states_callback(self, states_list):
         '''
@@ -283,7 +284,7 @@ class InverseKin:
             self.pub_parse.publish(Bool(True)) # tell parser to start again
 
     def reset_arm_callback(self, data):
-        if data.data == True
+        if data.data == True:
             self.started_vision = False
             self.num_try = 0
 
