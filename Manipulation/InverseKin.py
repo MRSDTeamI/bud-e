@@ -179,23 +179,23 @@ class InverseKin:
         self.num_try = self.num_try + 1
         print "try: %d  retry: %d" % (self.num_try, self.NUM_RETRIES)
 
-        # Tell nav to return if we failed too many times
-        if self.num_try > self.NUM_RETRIES:
-            print "MAX retry reached, returning"
-            self.jctrl.move_home(False)     # move to home position of 'nav'
-            self.pub.publish(Bool(True))
-            self.pub_vision.publish(Bool(False))  # In case we want to re-run test again
-            return
+        ## Tell nav to return if we failed too many times
+        #if self.num_try > self.NUM_RETRIES:
+        #    print "MAX retry reached, returning"
+        #    self.jctrl.move_home(False)     # move to home position of 'nav'
+        #    self.pub.publish(Bool(True))
+        #    self.pub_vision.publish(Bool(False))  # In case we want to re-run test again
+        #    return
+        #else:
+        # Check if any joint positions are out of range
+        bad_joints = [x for x in joint_angles if x < -1.7 or x > 1.7]
+        if bad_joints:
+            print "Joint angle contains bad value (<-1.7 or >1.7)!"
+            print joint_angles
+            grasp_success = False
+        # Move arm to bottle and grasp it
         else:
-            # Check if any joint positions are out of range
-            bad_joints = [x for x in joint_angles if x < -1.7 or x > 1.7]
-            if bad_joints:
-                print "Joint angle contains bad value (<-1.7 or >1.7)!"
-                print joint_angles
-                grasp_success = False
-            # Move arm to bottle and grasp it
-            else:
-                grasp_success = self.grasp_bottle(joint_angles)
+            grasp_success = self.grasp_bottle(joint_angles)
 
         if not grasp_success:
             # Reset parse_center and try to grasp again with new coordinates
@@ -208,7 +208,17 @@ class InverseKin:
             # Reset arm to position then start vision again
             # Writing true should initiate vision_callback as well
             #self.jctrl.move_home(True)  # move arm to retry position
-            self.pub_vision.publish(Bool(True))
+
+            # Check number of tries here so we don't have to wait until next time we get
+            # bottle coordinate in order to 
+            if self.num_try >= self.NUM_RETRIES:
+                print "MAX retry reached, returning"
+                self.jctrl.move_home(False)     # move to home position of 'nav'
+                self.pub.publish(Bool(True))
+                self.pub_vision.publish(Bool(False))  # In case we want to re-run test again
+                return
+            else:
+                self.pub_vision.publish(Bool(True))
         else:
             print "SUCCESS"
             ## Move arm to basket and drop bottle
