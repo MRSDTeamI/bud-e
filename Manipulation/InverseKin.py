@@ -184,6 +184,7 @@ class InverseKin:
             print "MAX retry reached, returning"
             self.jctrl.move_home(False)     # move to home position of 'nav'
             self.pub.publish(Bool(True))
+            self.pub_vision.publish(Bool(False))  # In case we want to re-run test again
             return
         else:
             # Check if any joint positions are out of range
@@ -213,6 +214,7 @@ class InverseKin:
             ## Move arm to basket and drop bottle
             self.bottle_to_basket(joint_angles)
             self.jctrl.move_home(False)     # move to home position of 'nav'
+            self.pub_vision.publish(Bool(False))  # In case we want to re-run the test again
             # Tell nav to go back
             self.pub.publish(Bool(True))
 
@@ -241,8 +243,7 @@ class InverseKin:
             self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
             time.sleep(1)
             self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_grasp],invert=False)
-            time.sleep(1)
-            self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
+            time.sleep(1) self.set_joint_angles([0, 1.6, 1.6, 0, self.gripper_release],invert=False)
 
     def motor_states_callback(self, states_list):
         '''
