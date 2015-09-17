@@ -43,7 +43,7 @@ void parse_center(const geometry_msgs::Vector3 input)
     if (pause_parser)
         return;
 
-std::cerr << current_state << " | " << input.x << " " << input.y << " " << input.z << std::endl;
+    std::out << current_state << " | " << input.x << " " << input.y << " " << input.z << std::endl;
 
 	switch(current_state) {
 		// Just take the first input and mark it as initial point
@@ -63,9 +63,9 @@ std::cerr << current_state << " | " << input.x << " " << input.y << " " << input
             	count++;
 			} else {
 				// Print our coordinate
-std::cerr << "----------------" << std::endl;
-std::cerr << x << " " << y << " " << z << std::endl;
-std::cerr << "----------------" << std::endl;
+                std::cout << "----------------" << std::endl;
+                std::cout << x << " " << y << " " << z << std::endl;
+                std::cout << "----------------" << std::endl;
 
 				geometry_msgs::Vector3 arm_output;
 				/******

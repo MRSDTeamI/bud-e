@@ -34,6 +34,10 @@
 #
 # Author: Johnny Wang
 
+#############################################################
+# This is the controller for our Crustcrawler AX-12A arm.
+#############################################################
+
 import roslib
 #roslib.load_manifest('my_dynamixel_tutorial')
 

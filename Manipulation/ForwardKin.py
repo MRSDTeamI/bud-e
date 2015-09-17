@@ -53,6 +53,7 @@ class ForwardKin:
     def __init__(self, j_vals=None):
         self.NUM_JOINTS = 4
 
+        # Use argument as list of joint values else use a default list
         if type(j_vals) is list:
             #print len(j_vals)
             if len(j_vals) == self.NUM_JOINTS:

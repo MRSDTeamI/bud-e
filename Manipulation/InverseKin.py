@@ -99,7 +99,7 @@ class InverseKin:
             self.gripper_load = 0.0
             self.gripper_grasp = -0.5     # -1.1 if fingers flipped other way
             self.gripper_release = -1.5 
-            self.default_load = 7
+            self.default_load = 0
             rospy.Subscriber("motor_states/arm_port", MotorStateList, self.motor_states_callback)
             # To get whether we started vision (so know which arm move_home to use)
             rospy.Subscriber("start_vision", Bool, self.vision_callback)
@@ -168,7 +168,8 @@ class InverseKin:
 
         # Move elbow/gripper up first before we start moving to new location.
         # This is because if the new position is relatively close, we may start moving
-        # sideways and not lift the elbow/gripper up in time.
+        # sideways and not lift the elbow/gripper up in time (i.e. the arm will hit
+        # a corner of the square base).
         if self.prev_angles != None:
             self.prev_angles[2] = -1.7
             self.set_joint_angles(self.prev_angles)
@@ -179,15 +180,9 @@ class InverseKin:
         self.num_try = self.num_try + 1
         print "try: %d  retry: %d" % (self.num_try, self.NUM_RETRIES)
 
-        ## Tell nav to return if we failed too many times
-        #if self.num_try > self.NUM_RETRIES:
-        #    print "MAX retry reached, returning"
-        #    self.jctrl.move_home(False)     # move to home position of 'nav'
-        #    self.pub.publish(Bool(True))
-        #    self.pub_vision.publish(Bool(False))  # In case we want to re-run test again
-        #    return
-        #else:
-        # Check if any joint positions are out of range
+        # Check if any joint positions are out of range, fail immediately and return.
+        # This typically does not happen but when it does, and the arm tries to move
+        # to these angles, it will overload and die.
         bad_joints = [x for x in joint_angles if x < -1.7 or x > 1.7]
         if bad_joints:
             print "Joint angle contains bad value (<-1.7 or >1.7)!"
@@ -200,17 +195,9 @@ class InverseKin:
         if not grasp_success:
             # Reset parse_center and try to grasp again with new coordinates
             print "FAILED to grasp: reseting parse_center"
-            #self.pub_parse.publish(Bool(True))
-            #self.pub_parse.publish(Bool(True))
-            #self.pub_parse.publish(Bool(False))
-            #self.jctrl.move_home(self.started_vision)   # move arm to retry position
-                
-            # Reset arm to position then start vision again
-            # Writing true should initiate vision_callback as well
-            #self.jctrl.move_home(True)  # move arm to retry position
 
             # Check number of tries here so we don't have to wait until next time we get
-            # bottle coordinate in order to 
+            # bottle coordinate before aborting.
             if self.num_try >= self.NUM_RETRIES:
                 print "MAX retry reached, returning"
                 self.jctrl.move_home(False)     # move to home position of 'nav'
@@ -218,6 +205,7 @@ class InverseKin:
                 self.pub_vision.publish(Bool(False))  # In case we want to re-run test again
                 return
             else:
+                # Retry. Start vision process again to get coordinate.
                 self.pub_vision.publish(Bool(True))
         else:
             print "SUCCESS"
@@ -274,7 +262,7 @@ class InverseKin:
         elif data.data == False and self.started_vision == True:
             pass
         # Once we set 'start_vision' to true, we mark started_vision as true and also move
-        # the arm to the side to start grasping
+        # the arm to the side to start the vision parsing process.
         #elif data.data == True and self.started_vision == False:
         else:
             self.started_vision = True
@@ -316,8 +304,7 @@ class InverseKin:
         time.sleep(5)
 
         # Check 'load' of the gripper motor
-        #if self.gripper_load < self.default_load:
-        if self.gripper_load < 0:
+        if self.gripper_load < self.default_load:
             print "GRASPED: %f" % self.gripper_load
             return True
         else:
@@ -493,6 +480,8 @@ class InverseKin:
     def set_joint_angles(self, angles, invert=True):
         '''
         Set joint angles of the arm through dynamixel helper class.
+        The 2nd and 3rd join values are flipped when we get joint angles calculated by
+        the IK.
     
         '''
         if isinstance(angles, np.ndarray):
