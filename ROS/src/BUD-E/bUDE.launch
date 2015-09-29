@@ -1,6 +1,8 @@
-<launch
-  <include file="$(find {$FVE})/launch/${configs}"/>
-  <node name="$(find {$base})" pkg="$(find {hearbo_2dnav)" type="BUDE_BASE" output="screen" launch-prefix="xterm -e" />
-  <node pkg="rviz" type="rviz" name="rviz"/>
+<launch>
+  <include file="$(find hearbo_2dnav)/launch/hearbo_configuration.launch"/>
+  <include file="$(find hearbo_2dnav)/launch/move_base.launch"/>
+  <node pkg="rviz" type="rviz" name="rviz" launch-prefix="xterm -e" />
+  <node name="BUDE_BASE" pkg="hearbo_2dnav" type="BUDE_BASE" output="screen" launch-prefix="xterm -e" />
+
 
 </launch>
